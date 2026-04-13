@@ -1,0 +1,51 @@
+packages:
+  - apps/*
+  - packages/*
+  - tooling/*
+
+catalog:
+  "@eslint/js": ^9.38.0
+  "@hookform/resolvers": ^3.9.1
+  "@tailwindcss/postcss": ^4.1.16
+  "@tailwindcss/vite": ^4.1.16
+  "@tanstack/react-form": ^1.23.8
+  "@tanstack/react-query": ^5.90.8
+  "@tanstack/react-table": ^8.21.3
+  "@trpc/client": ^11.7.1
+  "@trpc/server": ^11.7.1
+  "@trpc/tanstack-react-query": ^11.7.1
+  "@types/node": ^22.18.12
+  "@vitejs/plugin-react": 5.1.0
+  eslint: ^9.38.0
+  prettier: ^3.6.2
+  next-intl: ^4.8.2
+  react-hook-form: ^7.54.2
+  tailwindcss: ^4.1.16
+  typescript: ^5.9.3
+  vite: 7.1.12
+  zod: ^3.24.1
+
+catalogs:
+  react19:
+    "@types/react": ~19.1.0
+    "@types/react-dom": ~19.1.0
+    react: 19.1.4
+    react-dom: 19.1.4
+
+ignoredBuiltDependencies:
+  - "@nestjs/core"
+  - bcrypt
+  - canvas
+  - esbuild
+
+linkWorkspacePackages: true
+
+onlyBuiltDependencies:
+  - "@tailwindcss/oxide"
+
+overrides:
+  "@types/minimatch": 5.1.2
+
+publicHoistPattern:
+  - "@ianvs/prettier-plugin-sort-imports"
+  - prettier-plugin-tailwindcss
