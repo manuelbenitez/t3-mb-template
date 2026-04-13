@@ -22,25 +22,6 @@ export default tseslint.config(
       ...reactHooks.configs.recommended.rules,
       "react/react-in-jsx-scope": "off",
       "import/no-duplicates": "error",
-      "import/order": [
-        "error",
-        {
-          groups: [
-            "builtin",
-            "external",
-            "parent",
-            "sibling",
-            "index",
-            "object",
-            "type",
-          ],
-          pathGroups: [
-            { pattern: "@acme/**", group: "parent", position: "before" },
-            { pattern: "~/**", group: "sibling", position: "after" },
-          ],
-          pathGroupsExcludedImportTypes: [],
-        },
-      ],
       "react/self-closing-comp": "error",
     },
   },
