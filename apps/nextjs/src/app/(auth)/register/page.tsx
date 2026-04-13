@@ -2,8 +2,8 @@
 
 import { useForm } from "react-hook-form";
 import Link from "next/link";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { registerSchema, type RegisterInput } from "@acme/validators";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useRegister } from "~/hooks/use-auth";
 
 export default function RegisterPage() {
