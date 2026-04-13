@@ -1,5 +1,4 @@
 import { ApiClient, createAuthClient } from "@acme/api-client";
-
 import { env } from "~/env";
 
 function getToken(): string | null {

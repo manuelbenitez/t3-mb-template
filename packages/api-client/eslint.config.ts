@@ -1,5 +1,3 @@
-import tseslint from "typescript-eslint";
+import baseConfig from "@acme/eslint-config/base";
 
-export default tseslint.config({
-  ignores: ["dist", "node_modules", ".cache", ".turbo"],
-});
+export default baseConfig;

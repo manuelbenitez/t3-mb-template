@@ -1,4 +1,3 @@
-import type { Request, Response } from "express";
 import {
   ArgumentsHost,
   Catch,
@@ -7,6 +6,7 @@ import {
   HttpStatus,
   Logger,
 } from "@nestjs/common";
+import type { Request, Response } from "express";
 
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
@@ -40,12 +40,17 @@ export class HttpExceptionFilter implements ExceptionFilter {
     } else if (exception instanceof Error) {
       message = exception.message;
       error = exception.name;
-      this.logger.error(`Unhandled error: ${exception.message}`, exception.stack);
+      this.logger.error(
+        `Unhandled error: ${exception.message}`,
+        exception.stack,
+      );
     } else {
       this.logger.error("Unknown exception type", exception);
     }
 
-    this.logger.error(`${request.method} ${request.url} - ${status} - ${message}`);
+    this.logger.error(
+      `${request.method} ${request.url} - ${status} - ${message}`,
+    );
 
     const responseBody: Record<string, unknown> = {
       statusCode: status,

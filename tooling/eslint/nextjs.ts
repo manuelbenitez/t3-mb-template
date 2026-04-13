@@ -1,6 +1,5 @@
 import type { Linter } from "eslint";
 import nextPlugin from "@next/eslint-plugin-next";
-
 import baseConfig from "./base.js";
 
 const config: Linter.Config[] = [
@@ -11,7 +10,7 @@ const config: Linter.Config[] = [
     },
     rules: {
       ...nextPlugin.configs.recommended.rules,
-      "@next/next/no-html-link": "warn",
+      "@next/next/no-html-link-for-pages": "warn",
       "@next/next/no-img-element": "warn",
     },
   },

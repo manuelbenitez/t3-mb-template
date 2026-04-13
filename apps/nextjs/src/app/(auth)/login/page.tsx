@@ -1,11 +1,9 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import Link from "next/link";
 import { useForm } from "react-hook-form";
-
+import Link from "next/link";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema, type LoginInput } from "@acme/validators";
-
 import { useLogin } from "~/hooks/use-auth";
 
 export default function LoginPage() {
@@ -25,7 +23,9 @@ export default function LoginPage() {
       <div className="w-full max-w-sm space-y-6 p-6">
         <div className="space-y-1">
           <h1 className="text-2xl font-bold">Sign in</h1>
-          <p className="text-sm text-gray-500">Enter your credentials to continue</p>
+          <p className="text-sm text-gray-500">
+            Enter your credentials to continue
+          </p>
         </div>
 
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">

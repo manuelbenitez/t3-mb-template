@@ -18,18 +18,14 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v4
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v6
+      - uses: actions/setup-node@v4
         with:
           node-version-file: ".nvmrc"
-
-      - name: Install Turbo
-        run: pnpm add -g turbo
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install
@@ -40,18 +36,14 @@ jobs:
   format:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v4
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v6
+      - uses: actions/setup-node@v4
         with:
           node-version-file: ".nvmrc"
-
-      - name: Install Turbo
-        run: pnpm add -g turbo
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install
@@ -62,18 +54,14 @@ jobs:
   typecheck:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v4
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v6
+      - uses: actions/setup-node@v4
         with:
           node-version-file: ".nvmrc"
-
-      - name: Install Turbo
-        run: pnpm add -g turbo
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install

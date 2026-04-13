@@ -1,7 +1,7 @@
 "use client";
 
-import { useCurrentUser } from "~/hooks/use-current-user";
 import { useLogout } from "~/hooks/use-auth";
+import { useCurrentUser } from "~/hooks/use-current-user";
 
 export default function DashboardPage() {
   const { data, isLoading } = useCurrentUser();
@@ -33,7 +33,7 @@ export default function DashboardPage() {
           </button>
         </div>
 
-        <div className="rounded-lg border p-6 space-y-2">
+        <div className="space-y-2 rounded-lg border p-6">
           <h2 className="font-semibold">Your profile</h2>
           {data?.user ? (
             <dl className="space-y-1 text-sm">
@@ -47,7 +47,11 @@ export default function DashboardPage() {
               </div>
               <div className="flex gap-2">
                 <dt className="text-gray-500">Roles</dt>
-                <dd>{data.user.roles.length > 0 ? data.user.roles.join(", ") : "—"}</dd>
+                <dd>
+                  {data.user.roles.length > 0
+                    ? data.user.roles.join(", ")
+                    : "—"}
+                </dd>
               </div>
             </dl>
           ) : (

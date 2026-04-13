@@ -1,5 +1,5 @@
-import type { NextConfig } from "next";
 import { createJiti } from "jiti";
+import type { NextConfig } from "next";
 
 const jiti = createJiti(import.meta.url);
 

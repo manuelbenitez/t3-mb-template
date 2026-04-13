@@ -1,10 +1,8 @@
 "use client";
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { LoginInput, RegisterInput } from "@acme/validators";
-
 import { authApi } from "~/lib/api";
 
 export function useLogin() {
