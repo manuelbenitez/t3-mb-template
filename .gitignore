@@ -19,3 +19,7 @@ dist/
 .cache
 .turbo
 .tanstack
+.gstack/
+
+*.tsbuildinfo
+coverage/
