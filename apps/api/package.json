@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "boot:check": "node scripts/boot-check.mjs",
     "build": "tsc -p tsconfig.build.json",
     "clean": "git clean -xdf .turbo dist node_modules",
     "dev": "nest start --watch --builder swc",
@@ -12,6 +13,7 @@
     "start:prod": "node dist/main",
     "test": "vitest run",
     "test:cov": "vitest run --coverage",
+    "test:e2e": "vitest run e2e",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit"
   },
