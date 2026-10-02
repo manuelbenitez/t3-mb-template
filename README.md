@@ -229,6 +229,17 @@ git remote set-url origin git@github.com:you/client-name.git
 
 Each project is independent — changes in one don't affect the others.
 
+### GitHub repo settings (once per new repo)
+
+Repo settings are not copied from a template, so set these on every new repo. `setup.sh` prints the commands with your repo filled in.
+
+| Setting                              | Why                                                                                                     | How                                                                                                                                  |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| Auto-delete head branches            | Merged branches disappear, and a stacked PR is retargeted to `main` when the branch under it is deleted | `gh api -X PATCH repos/OWNER/REPO -F delete_branch_on_merge=true`                                                                    |
+| Dependabot alerts + security updates | `.github/dependabot.yml` covers version updates; security fixes are a separate switch                   | `gh api -X PUT repos/OWNER/REPO/vulnerability-alerts && gh api -X PUT repos/OWNER/REPO/automated-security-fixes`                     |
+| Secret scanning + push protection    | A leaked key is caught on GitHub too, not only by the local commit gate                                 | Settings → Code security (on by default for public repos)                                                                            |
+| `ai-review` required check on `main` | The merge-time half of the review gate: `bash scripts/ai-review.sh mark` posts it                       | Settings → Branches → add a rule for `main` → require the `ai-review` status check (private repos need a paid plan for branch rules) |
+
 ---
 
 ## Requirements
