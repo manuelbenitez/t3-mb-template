@@ -8,7 +8,7 @@ import * as bcrypt from "bcrypt";
 import { Model } from "mongoose";
 
 import { CreateUserDto } from "./dto/create-user.dto";
-import { User, UserDocument } from "./schemas/user.schema";
+import { Role, User, UserDocument } from "./schemas/user.schema";
 
 @Injectable()
 export class UsersService {
@@ -47,7 +47,7 @@ export class UsersService {
     return user;
   }
 
-  async findAll(role?: "GP" | "LP"): Promise<User[]> {
+  async findAll(role?: Role): Promise<User[]> {
     const filter = role ? { roles: role } : {};
     return this.userModel.find(filter).select("-password").exec();
   }

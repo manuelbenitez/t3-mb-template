@@ -40,8 +40,22 @@ read -r -p "   Project name [my-app]: " PROJECT_NAME
 PROJECT_NAME="${PROJECT_NAME:-my-app}"
 echo ""
 
-# ── 3. MongoDB URI ────────────────────────────────────────────────
-echo -e "${YELLOW}3. MongoDB URI${NC}"
+# ── 3. GitHub repository ──────────────────────────────────────────
+echo -e "${YELLOW}3. GitHub repository (owner/name)${NC}"
+echo "   The Claude Code gates act on clones of this repo (.claude/review-map.yml)."
+echo ""
+read -r -p "   Repository [${ORG_NAME}/${PROJECT_NAME}]: " GITHUB_REPO
+GITHUB_REPO="${GITHUB_REPO:-${ORG_NAME}/${PROJECT_NAME}}"
+
+if [[ ! "$GITHUB_REPO" =~ ^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$ ]]; then
+  echo -e "${RED}   Error: repository must be owner/name.${NC}"
+  exit 1
+fi
+
+echo ""
+
+# ── 4. MongoDB URI ────────────────────────────────────────────────
+echo -e "${YELLOW}4. MongoDB URI${NC}"
 echo "   Local example:  mongodb://localhost:27017/${PROJECT_NAME}"
 echo "   Atlas example:  mongodb+srv://user:pass@cluster.mongodb.net/${PROJECT_NAME}"
 echo ""
@@ -55,8 +69,8 @@ fi
 
 echo ""
 
-# ── 4. JWT secret ─────────────────────────────────────────────────
-echo -e "${YELLOW}4. JWT secret${NC}"
+# ── 5. JWT secret ─────────────────────────────────────────────────
+echo -e "${YELLOW}5. JWT secret${NC}"
 echo "   Press Enter to auto-generate a secure 32-byte secret."
 echo ""
 read -r -p "   JWT secret [auto-generate]: " JWT_SECRET
@@ -71,8 +85,8 @@ fi
 
 echo ""
 
-# ── 5. Frontend URL ───────────────────────────────────────────────
-echo -e "${YELLOW}5. Frontend URL (for CORS)${NC}"
+# ── 6. Frontend URL ───────────────────────────────────────────────
+echo -e "${YELLOW}6. Frontend URL (for CORS)${NC}"
 echo ""
 read -r -p "   Frontend URL [http://localhost:3000]: " FRONTEND_URL
 FRONTEND_URL="${FRONTEND_URL:-http://localhost:3000}"
@@ -89,6 +103,7 @@ if [[ "$ORG_NAME" != "acme" ]]; then
     -name "*.json" -o -name "*.ts" -o -name "*.tsx" \
     -o -name "*.js" -o -name "*.mjs" -o -name "*.cjs" \
     -o -name "*.css" -o -name "*.md" \
+    -o -name "*.yml" -o -name "*.yaml" -o -name "*.sh" \
   \) \
     ! -path "*/node_modules/*" \
     ! -path "*/.next/*" \
@@ -103,6 +118,16 @@ fi
 echo "→ Setting project name to '${PROJECT_NAME}'…"
 ESCAPED_PROJECT=$(printf '%s\n' "$PROJECT_NAME" | sed 's/[\/&]/\\&/g')
 sed -i "s/\"name\": \"t3-mb-template\"/\"name\": \"${ESCAPED_PROJECT}\"/" package.json
+echo -e "  ${GREEN}Done.${NC}"
+
+# ── Point the agentic gates at this repo ─────────────────────────
+echo "→ Configuring .claude/review-map.yml for ${GITHUB_REPO}…"
+ESCAPED_REPO=$(printf '%s\n' "$GITHUB_REPO" | sed 's/[\/&]/\\&/g')
+STATE_DIR="$(printf '%s' "$PROJECT_NAME" | tr -cd 'a-zA-Z0-9._-')-hooks"
+sed -i \
+  -e "s/^  repo: \".*\"/  repo: \"${ESCAPED_REPO}\"/" \
+  -e "s/^  state_dir: \".*\"/  state_dir: \"${STATE_DIR}\"/" \
+  .claude/review-map.yml
 echo -e "  ${GREEN}Done.${NC}"
 
 # ── Write .env ────────────────────────────────────────────────────
@@ -126,6 +151,13 @@ echo "→ Installing dependencies (pnpm install)…"
 pnpm install
 echo -e "  ${GREEN}Done.${NC}"
 
+# ── Re-render and check the review map ───────────────────────────
+echo "→ Rendering the review-map blocks and checking the map…"
+node scripts/review-map.mjs render CLAUDE.md
+node scripts/review-map.mjs render apps/api/CLAUDE.md
+node scripts/review-map.mjs check
+echo -e "  ${GREEN}Done.${NC}"
+
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo -e "${GREEN}  Setup complete!${NC}"
@@ -137,5 +169,10 @@ echo "  Or start individually:"
 echo "    pnpm dev:next   → http://localhost:3000"
 echo "    pnpm dev:api    → http://localhost:3001/api"
 echo "                      http://localhost:3001/api/docs"
+echo ""
+echo "  Agentic workflow (Claude Code):"
+echo "    gstack is required for /review and the PR gate:"
+echo "    git clone https://github.com/garrytan/gstack.git ~/.claude/skills/gstack && cd ~/.claude/skills/gstack && ./setup"
+echo "    Gates and bypasses: internal-docs/runbooks/local-gates.md"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""

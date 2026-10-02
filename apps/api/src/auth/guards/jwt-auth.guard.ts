@@ -2,6 +2,10 @@ import { ExecutionContext, Injectable } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
 import { AuthGuard } from "@nestjs/passport";
 
+import { IS_PUBLIC_KEY } from "../decorators/public.decorator";
+
+// Registered globally (APP_GUARD): every route needs a valid token unless the
+// handler or its controller is marked @Public().
 @Injectable()
 export class JwtAuthGuard extends AuthGuard("jwt") {
   constructor(private reflector: Reflector) {
@@ -9,15 +13,13 @@ export class JwtAuthGuard extends AuthGuard("jwt") {
   }
 
   canActivate(context: ExecutionContext) {
-    const isPublic = this.reflector.get<boolean>(
-      "isPublic",
+    const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       context.getHandler(),
-    );
-
+      context.getClass(),
+    ]);
     if (isPublic) {
       return true;
     }
-
     return super.canActivate(context);
   }
 }

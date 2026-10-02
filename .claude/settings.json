@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": []
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/check-skills.sh\"",
+            "statusMessage": "Checking skills (gstack)"
+          },
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/internal-docs-index.sh\"",
+            "statusMessage": "Loading internal-docs index"
+          },
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/obligations-context.sh\"",
+            "statusMessage": "Obligations for this branch (skills, docs, markers)"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/reuse-ui-primitives.sh\"",
+            "statusMessage": "Reuse-before-invent check (new UI components)"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/bash-gate.sh\"",
+            "timeout": 900,
+            "statusMessage": "Commit / push / PR gates"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/secret-scan.sh\"",
+            "statusMessage": "Secret scan on write"
+          },
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/format-on-edit.sh\"",
+            "timeout": 15,
+            "statusMessage": "prettier + eslint --fix on edited file"
+          },
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/ui-inventory-drift.sh\"",
+            "timeout": 15,
+            "statusMessage": "@acme/ui inventory check"
+          },
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/edit-nudge.sh\"",
+            "timeout": 15,
+            "statusMessage": "Scope nudge (skills, docs page)"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/typecheck-on-stop.sh\"",
+            "timeout": 120,
+            "statusMessage": "Typecheck on changed workspaces (async)",
+            "asyncRewake": true,
+            "rewakeSummary": "typecheck failed"
+          }
+        ]
+      }
+    ]
+  }
+}

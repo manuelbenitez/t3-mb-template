@@ -4,43 +4,51 @@ packages:
   - tooling/*
 
 catalog:
-  "@eslint/js": ^9.38.0
-  "@hookform/resolvers": ^3.9.1
-  "@tailwindcss/postcss": ^4.1.16
-  "@tanstack/react-query": ^5.90.8
-  "@types/node": ^22.18.12
-  eslint: ^9.38.0
-  prettier: ^3.6.2
-  react-hook-form: ^7.54.2
-  tailwindcss: ^4.1.16
-  typescript: ^5.9.3
-  vitest: ^4.1.0
-  zod: ^3.24.1
+  '@eslint/js': ^10.0.1
+  '@hookform/resolvers': ^5.9.1
+  '@tailwindcss/postcss': ^4.3.3
+  '@tanstack/react-query': ^5.104.0
+  '@types/node': ^24.19.1
+  eslint: ^10.11.0
+  prettier: ^3.9.9
+  react-hook-form: ^7.89.0
+  tailwindcss: ^4.3.3
+  typescript: ~6.0.3
+  vitest: ^5.0.3
+  zod: ^4.6.5
 
 catalogs:
   react19:
-    "@types/react": ~19.1.0
-    "@types/react-dom": ~19.1.0
-    react: 19.1.4
-    react-dom: 19.1.4
+    '@types/react': ^19.3.0
+    '@types/react-dom': ^19.3.0
+    react: ^19.3.0
+    react-dom: ^19.3.0
 
 ignoredBuiltDependencies:
-  - "@nestjs/core"
+  - '@nestjs/core'
   - bcrypt
   - canvas
   - esbuild
   - mongodb-memory-server
-  - "@parcel/watcher"
+  - '@parcel/watcher'
   - unrs-resolver
 
 linkWorkspacePackages: true
 
 onlyBuiltDependencies:
-  - "@tailwindcss/oxide"
+  - '@tailwindcss/oxide'
 
 overrides:
-  "@types/minimatch": 5.1.2
+  '@types/minimatch': 5.1.2
 
 publicHoistPattern:
-  - "@ianvs/prettier-plugin-sort-imports"
+  - '@ianvs/prettier-plugin-sort-imports'
   - prettier-plugin-tailwindcss
+
+# eslint-plugin-react and eslint-plugin-import have not declared ESLint 10 yet;
+# tooling/eslint/base.ts loads them through fixupPluginRules. Remove once
+# they do.
+peerDependencyRules:
+  allowedVersions:
+    eslint-plugin-react>eslint: "10"
+    eslint-plugin-import>eslint: "10"

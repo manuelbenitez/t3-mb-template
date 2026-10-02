@@ -2,9 +2,8 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  roles: ("GP" | "LP")[];
+  roles: ("user" | "admin")[];
   emailVerified: boolean;
-  isAdmin: boolean;
   accountStatus: "active" | "paused" | "suspended";
   image?: string;
   createdAt?: string;
@@ -13,7 +12,7 @@ export interface User {
 
 export interface AuthResponse {
   access_token: string;
-  user: Omit<User, "isAdmin" | "accountStatus">;
+  user: Omit<User, "accountStatus">;
 }
 
 export interface SessionResponse {

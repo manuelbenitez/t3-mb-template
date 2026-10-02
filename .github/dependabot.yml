@@ -1,0 +1,54 @@
+# Security updates open as soon as an advisory lands; version updates come as
+# one grouped minor/patch PR a week plus one PR per framework family, so the
+# queue stays readable. The workspace has one root lockfile, so one npm entry
+# covers every app and package.
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "Europe/Amsterdam"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+    commit-message:
+      prefix: "chore(deps)"
+    groups:
+      # Nest packages pin each other's majors; they only move together.
+      nestjs:
+        patterns:
+          - "@nestjs/*"
+      react:
+        patterns:
+          - "react"
+          - "react-dom"
+          - "@types/react"
+          - "@types/react-dom"
+      minor-and-patch:
+        update-types:
+          - "minor"
+          - "patch"
+    ignore:
+      # Workspace links; setup.sh renames the scope.
+      - dependency-name: "@acme/*"
+      # Follows the runtime major in .nvmrc, not npm latest.
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
+      # Held at 6.x: @nestjs/swagger and typescript-eslint cap below 7.
+      # Lift once both accept it.
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "Europe/Amsterdam"
+    labels:
+      - "dependencies"
+    commit-message:
+      prefix: "chore(ci)"
