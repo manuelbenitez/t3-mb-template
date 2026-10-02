@@ -20,6 +20,7 @@
     "lint:ws": "pnpm dlx sherif@latest",
     "postinstall": "pnpm lint:ws",
     "test": "turbo run test --continue",
+    "test:gates": "bash scripts/hooks.test.sh && bash scripts/ai-review.test.sh && node scripts/review-map.test.mjs && node scripts/review-map.mjs check",
     "typecheck": "turbo run typecheck",
     "ui-add": "turbo run ui-add"
   },

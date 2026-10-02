@@ -85,3 +85,24 @@ jobs:
 
       - name: Test
         run: pnpm test
+
+  gates:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: ".nvmrc"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Lint the hooks
+        run: shellcheck -x -S warning .claude/hooks/*.sh .claude/hooks/gates/*.sh scripts/*.sh scripts/hooks.test.d/*.sh
+
+      - name: Gate tests and the review map
+        run: pnpm test:gates

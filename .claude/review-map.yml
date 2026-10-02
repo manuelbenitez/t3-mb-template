@@ -1,0 +1,165 @@
+# .claude/review-map.yml: the single source of truth for the agentic gates.
+# Read ONLY through scripts/review-map.mjs (match / lists / config / render / check).
+#
+# project:  what the hooks need to know about this repository (setup.sh fills repo
+#           and state_dir). Every gate reads it through `review-map.mjs config`.
+# skills:   review skills the map can require before a PR (ai-review.sh verify) or
+#           only suggest (trigger_only). gstack's /review is always required.
+# rules:    path globs -> skills and the internal-docs pages that describe them.
+#
+# Shape (the parser accepts nothing else): scalars and flow lists at the top level;
+# `project:` an indented block of key: value (string, true/false, [list] or
+# { "key": "value" } map); `skills:` a map of
+# `name: { when: "...", touch: "..."?, trigger_only: true? }` or `{}`; `rules:` a
+# block list of objects with id, paths, skills, internal_docs (relative to
+# project.internal_docs_root) and user_docs (relative to project.user_docs_root,
+# ending in /). Strings are double-quoted only, with no escapes; a flow list may
+# span lines. Globs: `**` is zero or more segments, `*` and `?` never cross `/`.
+# A path can match many rules; the effect is the union. never_docs_only wins.
+# After editing: node scripts/review-map.mjs render CLAUDE.md && node scripts/review-map.mjs render apps/api/CLAUDE.md && node scripts/review-map.mjs check
+version: 1
+
+project:
+  # owner/name on GitHub. The gates act on this checkout (and its worktrees) and
+  # on any clone whose origin is this repo; other repos are left alone.
+  repo: "manuelbenitez/t3-mb-template"
+  # Markers live under <git common dir>/<state_dir>, shared by every worktree.
+  state_dir: "app-hooks"
+  # Block commits whose message carries an AI attribution line.
+  attribution_guard: true
+  internal_docs_root: "internal-docs"
+  # User-facing docs (e.g. apps/docs/en). Empty: no user-docs rule, no freshness check.
+  user_docs_root: ""
+  # A staged change to the left needs a staged change under the right, same commit.
+  docs_pairs:
+    {
+      "apps/api/src/**": "internal-docs/",
+      "apps/nextjs/src/**": "internal-docs/frontend/",
+      "packages/ui/src/**": "internal-docs/frontend/",
+    }
+  # Never needs a docs change, never counts as user-visible.
+  docs_exempt:
+    [
+      "**/*.spec.ts",
+      "**/*.test.ts",
+      "**/*.test.tsx",
+      "**/*.stories.tsx",
+      "apps/api/src/testing/**",
+    ]
+  # What an end user sees; needs a user_docs_root change or a `User-Docs: none — <reason>` trailer.
+  user_visible: []
+  # Workspace directory -> pnpm package name (typecheck on stop, related tests on commit).
+  workspaces:
+    {
+      "apps/api": "@acme/api",
+      "apps/nextjs": "@acme/nextjs",
+      "packages/ui": "@acme/ui",
+      "packages/validators": "@acme/validators",
+      "packages/api-client": "@acme/api-client",
+    }
+  # Commit tier, on a staged manifest: fast, offline, never builds.
+  deps_check:
+    [
+      "pnpm install --frozen-lockfile --lockfile-only --offline",
+      "pnpm typecheck",
+    ]
+  # By hand before a PR that changes a manifest (scripts/deps-smoke.sh): build and boot.
+  deps_smoke:
+    ["pnpm --filter @acme/api build", "pnpm --filter @acme/api boot:check"]
+  # What the lifecycle suite can see: its marker is keyed to these trees.
+  lifecycle_inputs: ["apps/api", "packages", "pnpm-lock.yaml"]
+  lifecycle_suite: "pnpm --filter @acme/api test:e2e"
+  # Never scanned for secrets (shell patterns, repo-relative or absolute).
+  secret_exempt:
+    [
+      "*.md",
+      "*.env.example",
+      "*.spec.ts",
+      "*.test.ts",
+      "*/__mocks__/*",
+      "*test-fixtures/*",
+      "apps/api/src/testing/*",
+      "*/apps/api/src/testing/*",
+      "apps/api/src/config/env.validation.ts",
+      "*/apps/api/src/config/env.validation.ts",
+    ]
+  # Files holding <!-- review-map:... --> blocks that `render` and `check` keep current.
+  rendered_files: ["CLAUDE.md", "apps/api/CLAUDE.md"]
+
+# A delta made only of these never needs a new review (the carry-over rule of ai-review.sh verify)...
+docs_only: ["internal-docs/**/*.md", "**/*.md"]
+# ...unless it also touches code, the gates that judge it, or a manifest.
+never_docs_only:
+  [
+    ".claude/**",
+    "scripts/**",
+    "tooling/**",
+    "**/package.json",
+    "**/pnpm-lock.yaml",
+    "**/pnpm-workspace.yaml",
+    "CLAUDE.md",
+    "**/CLAUDE.md",
+    "**/*.ts",
+    "**/*.mjs",
+  ]
+
+# A PR whose diff touches these must carry a lifecycle-suite marker for HEAD's tree.
+lifecycle:
+  [
+    "apps/api/src/auth/**",
+    "apps/api/src/users/**",
+    "apps/api/src/app.module.ts",
+  ]
+
+skills:
+  cso:
+    {
+      when: "authentication, sessions, secrets, permissions, anything an attacker would try first",
+      touch: "auth, guards, users, env validation",
+      trigger_only: true,
+    }
+
+rules:
+  - id: api-auth
+    paths:
+      [
+        "apps/api/src/auth/**",
+        "apps/api/src/config/**",
+        "apps/api/src/users/**",
+      ]
+    skills: [cso]
+    internal_docs: ["architecture/auth.md"]
+    user_docs: []
+  - id: api-core
+    paths: ["apps/api/src/*.ts", "apps/api/src/common/**"]
+    skills: []
+    internal_docs: ["architecture/api.md"]
+    user_docs: []
+  - id: portal
+    paths: ["apps/nextjs/src/**"]
+    skills: []
+    internal_docs: ["frontend/README.md"]
+    user_docs: []
+  - id: ui-library
+    paths: ["packages/ui/src/**", "packages/ui/package.json"]
+    skills: []
+    internal_docs: ["frontend/component-library.md"]
+    user_docs: []
+  - id: shared-packages
+    paths: ["packages/validators/src/**", "packages/api-client/src/**"]
+    skills: []
+    internal_docs: ["architecture/api.md"]
+    user_docs: []
+  - id: agentic-gates
+    paths:
+      [
+        ".claude/hooks/**",
+        ".claude/review-map.yml",
+        ".claude/settings.json",
+        "scripts/*.sh",
+        "scripts/*.mjs",
+        "scripts/hooks.test.d/**",
+      ]
+    skills: []
+    internal_docs: ["runbooks/local-gates.md"]
+    user_docs: []
