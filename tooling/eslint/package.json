@@ -7,7 +7,7 @@
     "./nextjs": "./nextjs.ts"
   },
   "dependencies": {
-    "@eslint/compat": "^1.4.1",
+    "@eslint/compat": "^2.1.1",
     "@eslint/js": "catalog:",
     "@next/eslint-plugin-next": "^16.3.8",
     "eslint-plugin-import": "^2.32.0",
