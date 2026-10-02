@@ -25,9 +25,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey:
-        configService.get<string>("JWT_SECRET") ??
-        "change-me-use-openssl-rand-base64-32",
+      secretOrKey: configService.getOrThrow<string>("JWT_SECRET"),
     });
   }
 
@@ -51,7 +49,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       userId: payload.sub,
       email: payload.email,
       roles: user.roles,
-      isAdmin: user.isAdmin,
     };
   }
 }

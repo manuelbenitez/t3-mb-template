@@ -1,4 +1,4 @@
-import { Controller, Get, Query, Request, UseGuards } from "@nestjs/common";
+import { Controller, Get, Query, Request } from "@nestjs/common";
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -6,12 +6,12 @@ import {
   ApiTags,
 } from "@nestjs/swagger";
 
-import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
+import { Roles } from "../auth/decorators/roles.decorator";
+import type { Role } from "./schemas/user.schema";
 import { UsersService } from "./users.service";
 
 @ApiTags("users")
 @ApiBearerAuth("JWT-auth")
-@UseGuards(JwtAuthGuard)
 @Controller("users")
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
@@ -25,10 +25,14 @@ export class UsersController {
   }
 
   @Get()
-  @ApiOperation({ summary: "List all users (optionally filter by role)" })
+  @Roles("admin")
+  @ApiOperation({
+    summary: "List all users (admin only; optional role filter)",
+  })
   @ApiResponse({ status: 200, description: "List of users" })
   @ApiResponse({ status: 401, description: "Unauthorized" })
-  async findAll(@Query("role") role?: "GP" | "LP") {
+  @ApiResponse({ status: 403, description: "Not an admin" })
+  async findAll(@Query("role") role?: Role) {
     return this.usersService.findAll(role);
   }
 }

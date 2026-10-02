@@ -18,9 +18,7 @@ import { JwtStrategy } from "./strategies/jwt.strategy";
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
-        secret:
-          configService.get<string>("JWT_SECRET") ??
-          "change-me-use-openssl-rand-base64-32",
+        secret: configService.getOrThrow<string>("JWT_SECRET"),
         signOptions: { expiresIn: "7d" },
       }),
       inject: [ConfigService],

@@ -63,8 +63,11 @@ GET  /api/auth/session    Authorization: Bearer ...   →  { user }
 ```
 
 - JWT stored in `localStorage`, injected automatically by `api-client`
-- `@Public()` decorator on any route to bypass the global `JwtAuthGuard`
+- Every route requires a valid token: `JwtAuthGuard` is global (`APP_GUARD`). Opt out with `@Public()` on a handler or a whole controller
+- `@Roles("admin")` restricts a route by role (global `RolesGuard`); roles live in `ROLES` in `user.schema.ts` (`user`, `admin`), new accounts get `user`
 - `@GetUser()` param decorator to access the current user in controllers
+- Suspended or paused accounts get 403 even with a valid token
+- The API refuses to boot unless `JWT_SECRET` is at least 32 characters and not the `.env.example` placeholder
 - Passwords hashed with bcrypt (10 rounds)
 
 **Swagger UI** at `http://localhost:3001/api/docs` when the API is running.

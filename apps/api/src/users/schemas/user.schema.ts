@@ -1,6 +1,9 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { Document } from "mongoose";
 
+export const ROLES = ["user", "admin"] as const;
+export type Role = (typeof ROLES)[number];
+
 export type UserDocument = User & Document;
 
 @Schema({ timestamps: true })
@@ -14,18 +17,12 @@ export class User extends Document {
   @Prop({ required: true, type: String })
   password: string;
 
-  /**
-   * Extensible roles array. Default values: "GP" (General Partner) and "LP" (Limited Partner).
-   * Extend the enum for your domain: e.g. ["admin", "member", "viewer"].
-   */
-  @Prop({ type: [String], enum: ["GP", "LP"], default: [] })
-  roles: ("GP" | "LP")[];
+  // Extend ROLES for your domain; @Roles() and RolesGuard read this list.
+  @Prop({ type: [String], enum: ROLES, default: ["user"] })
+  roles: Role[];
 
   @Prop({ default: false, type: Boolean })
   emailVerified: boolean;
-
-  @Prop({ default: false, type: Boolean })
-  isAdmin: boolean;
 
   @Prop({
     type: String,
@@ -58,5 +55,3 @@ UserSchema.set("toJSON", {
   },
 });
 /* eslint-enable @typescript-eslint/no-explicit-any */
-
-UserSchema.index({ email: 1 });

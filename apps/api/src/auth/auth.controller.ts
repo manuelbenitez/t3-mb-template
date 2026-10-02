@@ -1,11 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Post,
-  Request,
-  UseGuards,
-} from "@nestjs/common";
+import { Body, Controller, Get, Post, Request } from "@nestjs/common";
 import {
   ApiBearerAuth,
   ApiBody,
@@ -17,13 +10,14 @@ import {
 import { AuthService } from "./auth.service";
 import { LoginDto } from "./dto/login.dto";
 import { RegisterDto } from "./dto/register.dto";
-import { JwtAuthGuard } from "./guards/jwt-auth.guard";
+import { Public } from "./decorators/public.decorator";
 
 @ApiTags("auth")
 @Controller("auth")
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @Public()
   @Post("register")
   @ApiOperation({ summary: "Register a new user" })
   @ApiBody({ type: RegisterDto })
@@ -37,7 +31,7 @@ export class AuthController {
           id: "507f1f77bcf86cd799439011",
           name: "John Doe",
           email: "john@example.com",
-          roles: [],
+          roles: ["user"],
           emailVerified: false,
         },
       },
@@ -49,6 +43,7 @@ export class AuthController {
     return this.authService.register(registerDto);
   }
 
+  @Public()
   @Post("login")
   @ApiOperation({ summary: "Login with email and password" })
   @ApiBody({ type: LoginDto })
@@ -62,7 +57,7 @@ export class AuthController {
           id: "507f1f77bcf86cd799439011",
           name: "John Doe",
           email: "john@example.com",
-          roles: [],
+          roles: ["user"],
           emailVerified: true,
         },
       },
@@ -73,7 +68,6 @@ export class AuthController {
     return this.authService.login(loginDto);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get("session")
   @ApiBearerAuth("JWT-auth")
   @ApiOperation({ summary: "Get current authenticated user" })
@@ -86,7 +80,7 @@ export class AuthController {
           id: "507f1f77bcf86cd799439011",
           name: "John Doe",
           email: "john@example.com",
-          roles: [],
+          roles: ["user"],
           emailVerified: true,
         },
       },
