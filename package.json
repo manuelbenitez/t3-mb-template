@@ -2,7 +2,7 @@
   "name": "t3-mb-template",
   "private": true,
   "engines": {
-    "node": ">=20.0.0",
+    "node": ">=22.22.3",
     "pnpm": "^10.19.0"
   },
   "packageManager": "pnpm@10.19.0",

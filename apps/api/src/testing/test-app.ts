@@ -18,7 +18,7 @@ export async function createTestApp(): Promise<TestApp> {
   process.env.MONGODB_URI = mongo.getUri();
   process.env.JWT_SECRET = TEST_JWT_SECRET;
 
-  const { AppModule } = await import("../app.module");
+  const { AppModule } = await import("../app.module.js");
   const moduleRef = await Test.createTestingModule({
     imports: [AppModule],
   }).compile();
