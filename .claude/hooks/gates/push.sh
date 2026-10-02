@@ -8,7 +8,7 @@
 # review evidence for the sha git would push (`ai-review.sh verify`, log-side,
 # no network). Silent on pass, fails CLOSED on error.
 # Tests: scripts/hooks.test.d/50-evidence.sh. Bypasses: internal-docs/runbooks/local-gates.md.
-# Pushes from another repository (is_project_repo) are left alone.
+# A push neither from this project nor to project.repo is left alone.
 set -u
 . "$(dirname "$0")/../lib.sh"
 hook_read_payload
@@ -71,8 +71,26 @@ done
   block "❌ Push blocked: cannot tell which tree the push acts on (${HOOK_GIT_DIR:-${HOOK_CWD:-the cwd}} is not a git repo)."
 cd "$TOP" || block "❌ Push blocked: cannot enter $TOP."
 
-# This gate is this project's. A push from another repo is that repo's business.
-is_project_repo "$TOP" || exit 0
+# The gate applies when the push comes from this project or goes to it: a fork
+# or another clone pushing to project.repo is judged too.
+REMOTE=''
+i=0
+while [ "$i" -lt "${#PUSH_ARGS[@]}" ]; do
+  tok=${PUSH_ARGS[$i]}; i=$((i + 1))
+  case $tok in
+    --repo=*) REMOTE=${tok#--repo=}; break ;;
+    -o|--push-option|--receive-pack|--exec|--repo) i=$((i + 1)) ;;
+    -*) ;;
+    *) REMOTE=$tok; break ;;
+  esac
+done
+if [ -z "$REMOTE" ]; then
+  CUR=$(git symbolic-ref --short -q HEAD 2>/dev/null) || CUR=''
+  [ -n "$CUR" ] && REMOTE=$(git config --get "branch.$CUR.pushRemote" 2>/dev/null) || REMOTE=''
+  [ -n "$REMOTE" ] || REMOTE=$(git config --get remote.pushDefault 2>/dev/null) || REMOTE=origin
+fi
+URL=$(git remote get-url "$REMOTE" 2>/dev/null) || URL=$REMOTE
+is_project_repo "$TOP" || is_project_url "$URL" || exit 0
 
 # The dry run tells what would be pushed: flag, from:to, summary per line.
 ERR=$(mktemp); trap 'rm -f "$ERR"' EXIT

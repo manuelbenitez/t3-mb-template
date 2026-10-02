@@ -99,6 +99,13 @@ git -C "$T/repo" remote set-url origin "$T/broken/$REPO.git"
 gate push 2 repo 'git push origin feat' 'the dry run fails (origin unreachable) → cannot tell what would be pushed'
 said "cannot tell what would be pushed"; said "does not appear to be a git repository"
 git -C "$T/repo" remote set-url origin "$T/$REPO.git"
+git -C "$T/other" remote add proj "$T/$REPO.git"
+gate push 2 other 'git push proj HEAD:main' 'another clone pushing to project.repo: gated (here its dry run is refused)'
+said "Push blocked"
+gate push 2 other "git push $T/$REPO.git HEAD:main" 'the same push by URL'
+said "Push blocked"
+gate push 0 other 'git push origin HEAD:main' 'the same clone pushing to its own origin: not this gate'
+git -C "$T/other" remote remove proj
 raw push 2 '{"tool_input":{"command":"git push --all"' 'truncated JSON: still classified, still refused'
 said "push one ref"
 

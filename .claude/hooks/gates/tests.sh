@@ -33,7 +33,10 @@ done
 [ ${#CODE[@]} -eq 0 ] && exit 0
 hook_remedy "bash scripts/test-changed.sh ${CODE[*]}"
 
-OUT=$(bash scripts/test-changed.sh "${CODE[@]}" 2>&1)
+# The suites must not inherit the dispatcher's payload export (the hook harness
+# would read it instead of its own rows' payloads).
+OUT=$(env -u HOOK_PAYLOAD_SET -u HOOK_CMD -u HOOK_CWD -u HOOK_FILE -u HOOK_RAW -u HOOK_GIT_DIR -u HOOK_CLASSES -u TOP \
+  bash scripts/test-changed.sh "${CODE[@]}" 2>&1)
 [ $? -eq 0 ] && exit 0
 {
   echo "❌ Tests related to the staged files failed:"

@@ -17,6 +17,7 @@
 #   hook_config                        load the project: block of the review map into HOOK_CFG_* (once, exported)
 #   cfg_lines NAME                     a list or map HOOK_CFG_<NAME> as one entry per line
 #   is_project_repo [TOP]              TOP is this project: origin is project.repo, or TOP shares the hooks' git dir
+#   is_project_url URL                 the URL names project.repo
 #   commit_message_from_command [CMD]  → MESSAGE: the command text, -F/--file files, a reused message (B5)
 #   staged_paths [TOP] [FILTER]        → STAGED array, NUL-safe; FILTER defaults to ACMR, '' means all
 #   state_dir [TOP]                    <git common dir>/<project.state_dir>, absolute (B17)
@@ -245,13 +246,15 @@ repo_top() {
 # The project: block of .claude/review-map.yml, read once per hook run and
 # exported, so the dispatcher's stages never start node again. Returns 1 when
 # the map cannot be read; every caller treats that as a block.
+# Keyed to the map it came from: a child that reads another map (the hook
+# harness, REVIEW_MAP_TOP) reloads instead of trusting an inherited export.
 hook_config() {
-  local out
-  [ "${HOOK_CFG_LOADED:-}" = 1 ] && return 0
+  local out src="${HOOK_REVIEW_MAP_SCRIPT:-}|${REVIEW_MAP_TOP:-}|$HOOK_LIB_DIR"
+  [ "${HOOK_CFG_LOADED:-}" = "$src" ] && return 0
   out=$(map_query config 2>/dev/null) || return 1
   eval "$out" || return 1
   # shellcheck disable=SC2046  # one word per variable name
-  export HOOK_CFG_LOADED=1 $(printf '%s\n' "$out" | grep -oE '^HOOK_CFG_[A-Z_]+=' | tr -d =)
+  export HOOK_CFG_LOADED="$src" $(printf '%s\n' "$out" | grep -oE '^HOOK_CFG_[A-Z_]+=' | tr -d =)
 }
 cfg_lines() { local v="HOOK_CFG_$1"; [ -n "${!v:-}" ] && printf '%s\n' "${!v}"; }
 
@@ -259,13 +262,19 @@ cfg_lines() { local v="HOOK_CFG_$1"; [ -n "${!v:-}" ] && printf '%s\n' "${!v}"; 
 # holds these hooks, or any clone whose origin is project.repo. Another repo a
 # session happens to operate on is left alone.
 is_project_repo() {
-  local top=${1:-${TOP:-.}} mine theirs re
+  local top=${1:-${TOP:-.}} mine theirs
   hook_config || return 1
   mine=$(git -C "$HOOK_LIB_DIR" rev-parse --path-format=absolute --git-common-dir 2>/dev/null) || mine=''
   theirs=$(git -C "$top" rev-parse --path-format=absolute --git-common-dir 2>/dev/null) || return 1
   [ -n "$mine" ] && [ "$mine" = "$theirs" ] && return 0
+  is_project_url "$(git -C "$top" remote get-url origin 2>/dev/null)"
+}
+# A remote URL (https, ssh or a path) that names project.repo.
+is_project_url() {
+  local re
+  hook_config || return 1
   re=$(printf '%s' "$HOOK_CFG_REPO" | sed 's/[.]/\\./g')
-  git -C "$top" remote get-url origin 2>/dev/null | grep -qiE "[/:]$re(\.git)?/?\$"
+  printf '%s' "$1" | grep -qiE "[/:]$re(\.git)?/?\$"
 }
 
 # The message is in the command text (-m, heredoc) plus any -F/--file file,

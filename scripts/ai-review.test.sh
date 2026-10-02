@@ -7,6 +7,9 @@
 #
 #   bash scripts/ai-review.test.sh
 set -u
+# A run spawned by the commit gate inherits the dispatcher's exported payload
+# and config; the rows pipe their own, so start clean.
+unset HOOK_PAYLOAD_SET HOOK_CMD HOOK_CWD HOOK_FILE HOOK_RAW HOOK_GIT_DIR HOOK_CLASSES TOP HOOK_CFG_LOADED "${!HOOK_CFG_@}"
 ROOT=$(cd "$(dirname "$0")/.." && pwd)
 SCRIPT="$ROOT/scripts/ai-review.sh"
 HOOK="$ROOT/.claude/hooks/gates/pr-open.sh"

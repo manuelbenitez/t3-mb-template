@@ -20,6 +20,9 @@
 #   bash scripts/hooks.test.sh
 # shellcheck disable=SC2034  # TAB, CHEAP, ENV_RAW and the drivers' results are read by the row files
 set -u
+# A run spawned by the commit gate inherits the dispatcher's exported payload
+# and config; the rows pipe their own, so start clean.
+unset HOOK_PAYLOAD_SET HOOK_CMD HOOK_CWD HOOK_FILE HOOK_RAW HOOK_GIT_DIR HOOK_CLASSES TOP HOOK_CFG_LOADED "${!HOOK_CFG_@}"
 ROOT=$(cd "$(dirname "$0")/.." && pwd)
 HOOKS="$ROOT/.claude/hooks"
 command -v jq >/dev/null || { echo "jq is required" >&2; exit 1; }

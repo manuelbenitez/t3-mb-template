@@ -16,7 +16,14 @@
 // literal (parentheses included). Dotfiles are not special.
 import { spawnSync } from "node:child_process";
 import { existsSync, readFileSync, statSync, writeFileSync } from "node:fs";
-import { basename, dirname, isAbsolute, join, relative, resolve } from "node:path";
+import {
+  basename,
+  dirname,
+  isAbsolute,
+  join,
+  relative,
+  resolve,
+} from "node:path";
 import { fileURLToPath } from "node:url";
 
 export const SCRIPT_TOP = resolve(
@@ -304,8 +311,7 @@ export function parseMap(text, file = MAP_REL) {
       const t = next();
       if (t.type !== "key")
         fail(t, `expected a project key followed by ':', got ${show(t)}`);
-      if (!(t.value in PROJECT_KEYS))
-        fail(t, `unknown project key ${t.value}`);
+      if (!(t.value in PROJECT_KEYS)) fail(t, `unknown project key ${t.value}`);
       if (t.value in out) fail(t, `duplicate project key ${t.value}`);
       const kind = PROJECT_KEYS[t.value];
       out[t.value] =
@@ -539,11 +545,11 @@ export function matchPaths(map, paths) {
       internal_docs: union("internal_docs"),
       user_docs: union("user_docs"),
       lifecycle: anyMatch(life, path),
-      // The docs directory a staged change to this path must also touch, or
-      // null (no pair, or a test/story).
-      docs_area: anyMatch(exempt, path)
-        ? null
-        : (pairs.find((p) => p.re.test(path))?.area ?? null),
+      // Every docs directory a staged change to this path must also touch
+      // (the union of the matching pairs; none for a test or story).
+      docs_areas: anyMatch(exempt, path)
+        ? []
+        : [...new Set(pairs.filter((p) => p.re.test(path)).map((p) => p.area))],
       user_visible: !anyMatch(exempt, path) && anyMatch(visible, path),
       docs_only: anyMatch(never, path)
         ? "never"
@@ -740,7 +746,11 @@ export function checkMap(map, io) {
   for (const [glob, area] of Object.entries(map.project.docs_pairs)) {
     if (matching(glob).length === 0)
       errors.push(`project.docs_pairs: "${glob}" matches no tracked file`);
-    if (!io.dirExists(area.replace(/\/$/, "")))
+    if (!area || !area.endsWith("/"))
+      errors.push(
+        `project.docs_pairs: "${glob}" needs a directory ending in /, got "${area}"`,
+      );
+    else if (!io.dirExists(area.replace(/\/$/, "")))
       errors.push(`project.docs_pairs: "${area}" is not a directory`);
   }
   for (const [dir] of Object.entries(map.project.workspaces))

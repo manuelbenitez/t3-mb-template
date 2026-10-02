@@ -7,7 +7,6 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import { test } from "node:test";
-
 import {
   checkMap,
   docsOnlyVerdict,
@@ -217,14 +216,8 @@ test("hard parse errors", () => {
     BASE.replace('user_docs: ["billing/"]', 'user_docs: ["billing"]'),
     /ending in \//,
   );
-  parseErr(
-    BASE.replace("  portal-review:", "   portal-review:"),
-    /unexpected/,
-  );
-  parseErr(
-    BASE.replace('repo: "acme/app"', 'repo: "acme/app'),
-    /unterminated/,
-  );
+  parseErr(BASE.replace("  portal-review:", "   portal-review:"), /unexpected/);
+  parseErr(BASE.replace('repo: "acme/app"', 'repo: "acme/app'), /unterminated/);
   parseErr(
     BASE.replace("  portal-review: { when:", "  portal-review: { when"),
     /expected key/,
@@ -353,17 +346,17 @@ test("match: union per path, verdicts, docs area, required_skills excludes trigg
   assert.deepEqual(w.internal_docs, ["architecture/billing.md"]);
   assert.deepEqual(w.user_docs, ["billing/"]);
   assert.equal(w.lifecycle, false);
-  assert.equal(w.docs_area, "internal-docs/");
+  assert.deepEqual(w.docs_areas, ["internal-docs/"]);
   assert.equal(w.user_visible, false);
   assert.equal(w.docs_only, "never");
   const page = out.paths["apps/nextjs/src/app/(app)/billing/page.tsx"];
-  assert.equal(page.docs_area, "internal-docs/frontend/");
+  assert.deepEqual(page.docs_areas, ["internal-docs/frontend/"]);
   assert.equal(page.user_visible, true);
   const spec = out.paths["apps/api/src/billing/x.spec.ts"];
-  assert.equal(spec.docs_area, null, "docs_exempt: a spec needs no docs");
+  assert.deepEqual(spec.docs_areas, [], "docs_exempt: a spec needs no docs");
   assert.equal(spec.lifecycle, true);
   assert.equal(out.paths["internal-docs/x.md"].docs_only, "docs"); // leading ./ stripped
-  assert.equal(out.paths["internal-docs/x.md"].docs_area, null);
+  assert.deepEqual(out.paths["internal-docs/x.md"].docs_areas, []);
   assert.equal(out.paths[".claude/x.md"].docs_only, "never"); // never wins over **/*.md
   assert.equal(out.paths["apps/nextjs/messages/en.json"].docs_only, "code");
   assert.deepEqual(out.paths["apps/nextjs/messages/en.json"].rules, []);
@@ -375,6 +368,20 @@ test("match: union per path, verdicts, docs area, required_skills excludes trigg
   ]);
   assert.equal(out.skills["security-check"].trigger_only, true);
   assert.equal(docsOnlyVerdict(m, "DESIGN.md"), "docs");
+  // every matching pair applies, not just the first
+  const both = parseMap(
+    BASE.replace(
+      '"apps/nextjs/src/**": "internal-docs/frontend/" }',
+      '"apps/nextjs/src/**": "internal-docs/frontend/", "apps/api/src/math/**": "internal-docs/math/" }',
+    ),
+    "fixture.yml",
+  );
+  assert.deepEqual(
+    matchPaths(both, ["apps/api/src/math/rates.ts"]).paths[
+      "apps/api/src/math/rates.ts"
+    ].docs_areas,
+    ["internal-docs/", "internal-docs/math/"],
+  );
   assert.deepEqual(matchPaths(m, []), {
     paths: {},
     skills: {},
@@ -517,6 +524,26 @@ test("checkMap: errors, warnings and info with an injected tree", () => {
   ])
     assert.ok(noPage.errors.includes(want), `missing: ${want}`);
 
+  for (const [area, why] of [
+    ["", "empty"],
+    ["internal-docs", "no trailing /"],
+  ]) {
+    const bad = checkMap(
+      parseMap(
+        BASE.replace(
+          '"apps/api/src/**": "internal-docs/"',
+          `"apps/api/src/**": "${area}"`,
+        ),
+        "fixture.yml",
+      ),
+      io(),
+    );
+    assert.ok(
+      bad.errors.some((e) => e.includes("needs a directory ending in /")),
+      `an area that is ${why} is an error`,
+    );
+  }
+
   const noUserDocs = checkMap(
     parseMap(
       BASE.replace('user_docs_root: "apps/docs/en"', 'user_docs_root: ""'),
@@ -585,7 +612,7 @@ test("the committed map loads and its skills are reachable", () => {
   const auth = matchPaths(m, ["apps/api/src/auth/auth.service.ts"]).paths[
     "apps/api/src/auth/auth.service.ts"
   ];
-  assert.equal(auth.docs_area, "internal-docs/");
+  assert.deepEqual(auth.docs_areas, ["internal-docs/"]);
   assert.deepEqual(auth.internal_docs, ["architecture/auth.md"]);
   assert.equal(auth.lifecycle, true);
   for (const [dir, pkg] of Object.entries(m.project.workspaces))
@@ -634,6 +661,8 @@ test("match writes its whole answer through a pipe, past 64 KB", () => {
   const parsed = JSON.parse(r.stdout);
   assert.equal(Object.keys(parsed.paths).length, paths.length);
   assert.ok(
-    Object.values(parsed.paths).every((p) => p.docs_area === "internal-docs/"),
+    Object.values(parsed.paths).every(
+      (p) => p.docs_areas[0] === "internal-docs/",
+    ),
   );
 });

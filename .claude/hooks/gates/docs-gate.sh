@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Commit stage (cheap tier): on `git commit`, block when
-#   1. a staged path has a docs area (project.docs_pairs in the review map) and
-#      nothing under that area is staged in the same commit, or
+#   1. a staged path has docs areas (every matching project.docs_pairs entry in
+#      the review map) and nothing under one of them is staged, or
 #   2. a staged path is user-visible (project.user_visible) and nothing under
 #      project.user_docs_root is staged and the message carries no
 #      `User-Docs: none — <reason>` trailer (a reused message, --amend
@@ -67,7 +67,7 @@ while IFS=$'\t' read -r area paths; do
   problems+="$(suggest internal_docs "$HOOK_CFG_INTERNAL_DOCS_ROOT/" "${area}README.md (find the page for this area)" "$paths")"$'\n'
   problems+="  (for $(printf '%s\n' "$paths" | head -3 | paste -sd, - | sed 's/,/, /g'))"$'\n'$'\n'
 done < <(printf '%s' "$MATCH" | jq -r '
-  [.paths | to_entries[] | select(.value.docs_area != null) | {a: .value.docs_area, p: .key}]
+  [.paths | to_entries[] | .key as $p | .value.docs_areas[] | {a: ., p: $p}]
   | group_by(.a)[] | "\(.[0].a)\t\(map(.p) | join("\u001f"))"')
 
 # 2. User-visible paths, when the project keeps user docs.
