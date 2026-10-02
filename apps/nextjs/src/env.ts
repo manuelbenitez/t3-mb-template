@@ -8,7 +8,7 @@ export const env = createEnv({
       .default("development"),
   },
   client: {
-    NEXT_PUBLIC_API_URL: z.string().url(),
+    NEXT_PUBLIC_API_URL: z.url(),
   },
   experimental__runtimeEnv: {
     NODE_ENV: process.env.NODE_ENV,

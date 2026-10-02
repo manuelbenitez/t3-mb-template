@@ -5,7 +5,16 @@ import tseslint from "typescript-eslint";
 import js from "@eslint/js";
 
 export default tseslint.config(
-  { ignores: ["*.config.js", "*.config.ts", "dist/**", "node_modules/**"] },
+  {
+    ignores: [
+      "*.config.js",
+      "*.config.ts",
+      "dist/**",
+      "node_modules/**",
+      ".next/**",
+      "coverage/**",
+    ],
+  },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
