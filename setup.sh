@@ -63,7 +63,7 @@ read -r -p "   JWT secret [auto-generate]: " JWT_SECRET
 
 if [[ -z "$JWT_SECRET" ]]; then
   JWT_SECRET=$(openssl rand -base64 32)
-  echo -e "   ${GREEN}Generated: ${JWT_SECRET}${NC}"
+  echo -e "   ${GREEN}Generated a 32-byte secret (written to .env only).${NC}"
 elif [[ ${#JWT_SECRET} -lt 32 ]]; then
   echo -e "${RED}   Error: JWT secret must be at least 32 characters.${NC}"
   exit 1

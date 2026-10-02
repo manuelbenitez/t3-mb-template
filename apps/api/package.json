@@ -6,10 +6,13 @@
     "build": "tsc -p tsconfig.build.json",
     "clean": "git clean -xdf .turbo dist node_modules",
     "dev": "nest start --watch --builder swc",
+    "format": "prettier --check . --ignore-path ../../.gitignore",
+    "lint": "eslint \"src/**/*.ts\"",
     "start": "nest start",
     "start:prod": "node dist/main",
-    "format": "prettier --check . --ignore-path ../../.gitignore",
-    "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
+    "test": "jest",
+    "test:cov": "jest --coverage",
+    "test:watch": "jest --watch",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -43,10 +46,16 @@
     "@swc/core": "^1.15.11",
     "@types/bcrypt": "^5.0.2",
     "@types/express": "^5.0.0",
+    "@types/jest": "^30.0.0",
     "@types/node": "catalog:",
     "@types/passport-jwt": "^4.0.1",
+    "@types/supertest": "^7.2.0",
     "eslint": "catalog:",
+    "jest": "^30.5.2",
+    "mongodb-memory-server": "^11.3.0",
     "prettier": "catalog:",
+    "supertest": "^7.3.0",
+    "ts-jest": "^29.4.13",
     "typescript": "catalog:"
   },
   "prettier": "@acme/prettier-config"
