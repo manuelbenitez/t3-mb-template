@@ -130,4 +130,4 @@ Every block names its remedy and never a bypass. The ways past exist; they are l
 - `bash scripts/ai-review.test.sh`: `verify`, `mark`, the carry-over, merges, the log files, the pr-open matcher.
 - `node scripts/review-map.test.mjs` and `node scripts/review-map.mjs check`.
 - `pnpm test:gates` runs all three. CI runs them too.
-- Lint: `shellcheck -x -S warning .claude/hooks/*.sh .claude/hooks/gates/*.sh scripts/*.sh scripts/hooks.test.d/*.sh`.
+- Lint (shellcheck 0.11, pinned in CI): `shellcheck -x -S warning .claude/hooks/*.sh .claude/hooks/gates/*.sh scripts/*.sh scripts/hooks.test.d/*.sh`.

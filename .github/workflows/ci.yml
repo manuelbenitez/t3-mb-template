@@ -17,6 +17,7 @@ env:
 jobs:
   lint:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
 
@@ -35,6 +36,7 @@ jobs:
 
   format:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
 
@@ -53,6 +55,7 @@ jobs:
 
   typecheck:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
 
@@ -70,6 +73,7 @@ jobs:
         run: pnpm typecheck
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
 
@@ -88,6 +92,7 @@ jobs:
 
   gates:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
 
@@ -102,7 +107,7 @@ jobs:
         run: pnpm install
 
       - name: Lint the hooks
-        run: shellcheck -x -S warning .claude/hooks/*.sh .claude/hooks/gates/*.sh scripts/*.sh scripts/hooks.test.d/*.sh
+        run: pipx run shellcheck-py==0.11.0.1 -x -S warning .claude/hooks/*.sh .claude/hooks/gates/*.sh scripts/*.sh scripts/hooks.test.d/*.sh
 
       - name: Gate tests and the review map
         run: pnpm test:gates
