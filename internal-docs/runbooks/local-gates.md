@@ -8,7 +8,7 @@ Posture: deterministic shell at commit time (cheap, fail-closed), evidence at PR
 
 - **gstack** (required): `/review`, whose log the push and PR gates read. `git clone https://github.com/garrytan/gstack.git ~/.claude/skills/gstack && cd ~/.claude/skills/gstack && ./setup`. The session-start hook nags while it is missing.
 - **jq**, **node 22+**, **git 2.31+** on PATH. Without jq every gate fails closed.
-- **GitHub:** add the `ai-review` commit status as a required check on `main` (Settings → Branches). `ai-review.sh mark` posts it; that is the control that holds at merge time.
+- **GitHub:** add the `ai-review` commit status as a required check on `main` (Settings → Branches). `ai-review.sh mark` posts it; that is the control that holds at merge time. The other repo settings a new project needs (auto-delete branches, Dependabot security updates, secret scanning) are listed in the README under "GitHub repo settings".
 
 ## Vocabulary
 
