@@ -21,8 +21,8 @@ rec() { # rec <skill> <status> <sha> [critical] [dirty]   — append a record to
 }
 sha() { git -C "$(where "$1")" rev-parse "${2:-HEAD}"; }
 mark_head() { mkdir -p "$MARKS" && : >"$MARKS/$(sha "${1:-repo}")"; }           # the ai-review mark for HEAD
-life_marker() { mkdir -p "$STATE/lifecycle" && : >"$STATE/lifecycle/$(lifecycle_key "$(where "${1:-repo}")" HEAD)"; }
-deps_marker() { mkdir -p "$STATE/deps" && : >"$STATE/deps/$(deps_key "$(where "${1:-repo}")" HEAD)"; }
+life_marker() { mkdir -p "$STATE/lifecycle" && : >"$STATE/lifecycle/$(lifecycle_key "$T/repo" HEAD)"; }
+deps_marker() { mkdir -p "$STATE/deps" && : >"$STATE/deps/$(deps_key "$T/repo" HEAD)"; }
 evidence_for() { local s=$1; shift; for n in "$@"; do rec "$n" clean "$s"; done; } # evidence_for <sha> <names…>
 scrub() { reset; : >"$FAKE_LOG"; rm -rf "$T/gstack" "$STATE" "$MARKS"; }
 NOGH_PATH=$(printf '%s' "$PATH" | sed "s#$T/bin:##")
