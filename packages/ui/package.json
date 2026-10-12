@@ -27,7 +27,7 @@
     "prettier": "catalog:",
     "react": "catalog:react19",
     "typescript": "catalog:",
-    "typescript-eslint": "^8.71.0",
+    "typescript-eslint": "^8.71.1",
     "zod": "catalog:"
   },
   "peerDependencies": {
