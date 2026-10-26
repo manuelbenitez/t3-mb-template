@@ -20,7 +20,7 @@
     "@hookform/resolvers": "catalog:",
     "@t3-oss/env-nextjs": "^0.13.11",
     "@tanstack/react-query": "catalog:",
-    "next": "^16.3.8",
+    "next": "^16.4.2",
     "react": "catalog:react19",
     "react-dom": "catalog:react19",
     "react-hook-form": "catalog:",
