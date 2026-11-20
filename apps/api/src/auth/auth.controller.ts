@@ -12,11 +12,18 @@ import { LoginDto } from "./dto/login.dto";
 import { RegisterDto } from "./dto/register.dto";
 import { Public } from "./decorators/public.decorator";
 
+/** Public register and login, and the session of the signed-in user. */
 @ApiTags("auth")
 @Controller("auth")
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  /**
+   * Creates an account and signs the new user in.
+   *
+   * @param registerDto - Name, email and password.
+   * @returns The access token and the public user.
+   */
   @Public()
   @Post("register")
   @ApiOperation({ summary: "Register a new user" })
@@ -43,6 +50,12 @@ export class AuthController {
     return this.authService.register(registerDto);
   }
 
+  /**
+   * Signs a user in with email and password.
+   *
+   * @param loginDto - Email and password.
+   * @returns The access token and the public user.
+   */
   @Public()
   @Post("login")
   @ApiOperation({ summary: "Login with email and password" })
@@ -68,6 +81,12 @@ export class AuthController {
     return this.authService.login(loginDto);
   }
 
+  /**
+   * Returns the user behind the bearer token.
+   *
+   * @param req - The request, carrying the user the JWT strategy attached.
+   * @returns The current user.
+   */
   @Get("session")
   @ApiBearerAuth("JWT-auth")
   @ApiOperation({ summary: "Get current authenticated user" })

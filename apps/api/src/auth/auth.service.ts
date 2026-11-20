@@ -6,6 +6,7 @@ import { UsersService } from "../users/users.service";
 import { LoginDto } from "./dto/login.dto";
 import { RegisterDto } from "./dto/register.dto";
 
+/** Account creation, credential checks and token signing. */
 @Injectable()
 export class AuthService {
   constructor(
@@ -13,6 +14,12 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
+  /**
+   * Creates the user and signs a token for them.
+   *
+   * @param registerDto - Name, email and password.
+   * @returns The access token and the public user.
+   */
   async register(registerDto: RegisterDto) {
     const user = await this.usersService.create({
       name: registerDto.name,
@@ -34,6 +41,13 @@ export class AuthService {
     };
   }
 
+  /**
+   * Checks the email and password and signs a token.
+   *
+   * @param loginDto - Email and password.
+   * @returns The access token and the public user.
+   * @throws {UnauthorizedException} When the email is unknown or the password is wrong.
+   */
   async login(loginDto: LoginDto) {
     const user = await this.usersService.findByEmail(loginDto.email);
 
@@ -64,6 +78,12 @@ export class AuthService {
     };
   }
 
+  /**
+   * Loads the user a token belongs to.
+   *
+   * @param userId - The token's subject.
+   * @returns The user.
+   */
   async validateUser(userId: string) {
     return this.usersService.findById(userId);
   }

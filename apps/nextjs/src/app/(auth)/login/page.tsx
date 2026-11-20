@@ -6,6 +6,11 @@ import { loginSchema, type LoginInput } from "@acme/validators";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useLogin } from "~/hooks/use-auth";
 
+/**
+ * Email and password sign-in; a success stores the token and opens the dashboard.
+ *
+ * @returns The sign-in form.
+ */
 export default function LoginPage() {
   const login = useLogin();
 

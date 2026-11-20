@@ -150,6 +150,11 @@ rules:
     skills: []
     internal_docs: ["architecture/api.md"]
     user_docs: []
+  - id: code-style
+    paths: ["tooling/eslint/**"]
+    skills: []
+    internal_docs: ["conventions/code-style.md"]
+    user_docs: []
   - id: agentic-gates
     paths:
       [

@@ -22,6 +22,8 @@ react-hook-form with `zodResolver` and the shared schemas from `@acme/validators
 
 Reuse `@acme/ui` before writing a primitive ([component-library.md](component-library.md)); add shadcn components with `pnpm ui-add`.
 
+Every page, component, hook and module-level `const` carries JSDoc; a component documents its props as `@param props`. No comments that narrate the code. See [conventions/code-style.md](../conventions/code-style.md).
+
 ## Tests
 
 Vitest, node environment by default; a component test opts into a DOM with a `// @vitest-environment jsdom` docblock. `pnpm --filter @acme/nextjs test`.

@@ -10,6 +10,7 @@ import { AuthController } from "./auth.controller";
 import { AuthService } from "./auth.service";
 import { JwtStrategy } from "./strategies/jwt.strategy";
 
+/** JWT authentication: the strategy, tokens signed with JWT_SECRET for 7 days, and the auth endpoints. */
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),

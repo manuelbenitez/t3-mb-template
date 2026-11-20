@@ -1,6 +1,12 @@
 import type { ApiClient } from "./client";
 import type { AuthResponse, SessionResponse } from "./types";
 
+/**
+ * Binds the auth endpoints to a client.
+ *
+ * @param client - The client the calls go through.
+ * @returns login, register and getSession.
+ */
 export function createAuthClient(client: ApiClient) {
   return {
     login: (data: { email: string; password: string }) =>

@@ -9,16 +9,14 @@ import { RolesGuard } from "./auth/guards/roles.guard";
 import { validateEnv } from "./config/env.validation";
 import { UsersModule } from "./users/users.module";
 
+/** Root module: the validated env, the MongoDB connection, the feature modules and the global guards. */
 @Module({
   imports: [
-    // Environment configuration — global so all modules can inject ConfigService
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: "../../.env",
       validate: validateEnv,
     }),
-
-    // MongoDB connection
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
@@ -26,8 +24,6 @@ import { UsersModule } from "./users/users.module";
       }),
       inject: [ConfigService],
     }),
-
-    // Feature modules
     AuthModule,
     UsersModule,
   ],
