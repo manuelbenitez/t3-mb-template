@@ -4,10 +4,11 @@ The code says what it does through its names and its shape. JSDoc says what a de
 
 ## JSDoc on every module-level declaration
 
-Every function, component, hook, class, class method, `const`, `type`, `interface` and `enum` declared at the top of a module carries a JSDoc block, exported or not. Locals inside a function body don't.
+Every function, component, hook, class, class method (an arrow-function property counts), `const`, `type`, `interface` and `enum` declared at the top of a module carries a JSDoc block, exported or not. Locals inside a function body don't.
 
 - A one-line summary of what it is for or what it guarantees, not a restatement of its name.
 - `@param name - description` for every parameter, `@returns` when it returns a value, `@throws {Type}` for every exception it throws itself.
+- ESLint checks `@throws` only where it can see the `throw`: a synchronous function. It skips async functions, where most NestJS exceptions are thrown, so there the tag is on the author and the review.
 - No types in braces on `@param` or `@returns`: TypeScript already has them. `@throws` keeps its `{Type}`, since the signature can't say what a function throws.
 - A destructured parameter is documented by its root (`@param props - ...` for a component); its fields aren't listed.
 - A decorator or package name in prose goes in backticks (`` `@Public()` ``), or the parser reads it as a tag.
@@ -23,7 +24,7 @@ Every function, component, hook, class, class method, `const`, `type`, `interfac
 async login(loginDto: LoginDto) {
 ```
 
-Exempt: tests (`*.spec.ts`, `*.test.ts(x)`), stories, `**/testing/**`, config files, and `packages/ui` (shadcn files, whose ESLint config doesn't extend the shared base).
+Exempt: `*.spec.ts(x)`, `*.e2e-spec.ts`, `*.test.ts(x)`, `*.stories.tsx`, `**/testing/**`, `*.config.ts`, plain JavaScript files (the rules assume TypeScript, with no `{types}`), and `packages/ui` (shadcn files, whose ESLint config doesn't extend the shared base).
 
 ## Comments inside the code
 
@@ -39,11 +40,13 @@ app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
 { provide: APP_GUARD, useClass: JwtAuthGuard },
 ```
 
+Tool directives are not comments in this sense: `// eslint-disable-next-line`, `// @ts-expect-error`, `// @vitest-environment jsdom`, `// c8 ignore next`.
+
 If a block needs a comment to be understood, extract it into a function whose name and JSDoc say it.
 
 ## What enforces it
 
-- **ESLint** (`eslint-plugin-jsdoc`, configured in `tooling/eslint/base.ts`) for the JSDoc rules. The editor, the commit gate and CI's `pnpm lint` all run it. Fixers that would insert placeholder docs are off, so `--fix` never writes an empty block.
+- **ESLint** (`eslint-plugin-jsdoc`, configured in `tooling/eslint/base.ts`) for the JSDoc rules. The editor, the commit gate and CI's `pnpm lint` all run it. Fixers that would insert placeholder docs or delete text (`empty-tags`, `no-defaults`, the tag-name rewrites) are off, so `--fix` never writes an empty block or drops a word.
 - **The on-edit hook** (`.claude/hooks/format-on-edit.sh`) passes the `jsdoc/*` errors left after its `eslint --fix` back to Claude right after the edit, and notes when an edit adds `//` comments. See [runbooks/local-gates.md](../runbooks/local-gates.md).
 - The `//` rule itself is a convention, reviewed in `/review`; no lint rule can tell a why from a what.
 

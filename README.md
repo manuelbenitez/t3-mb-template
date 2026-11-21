@@ -244,7 +244,7 @@ Repo settings are not copied from a template, so set these on every new repo. `s
 
 ## Requirements
 
-- Node.js 24 LTS (`.nvmrc`; >= 22.22.3 works)
+- Node.js 24 LTS (`.nvmrc`; 22.22.3+ or 24.15+ works, the floor `eslint-plugin-jsdoc` sets)
 - pnpm >= 10.19
 - MongoDB (local or Atlas); tests use an in-memory server
 - For the agentic workflow: Claude Code, gstack, `jq`, `gh`

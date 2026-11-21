@@ -24,7 +24,7 @@ Code under `apps/api/src` updates its `internal-docs/` page in the same commit; 
 ## Code style
 
 - Names and structure carry the meaning. No comment that narrates what the next line does.
-- JSDoc on every module-level declaration (function, component, hook, class, method, const, type): a summary, `@param`, `@returns`, `@throws {Type}`; no `{types}` on params or returns. ESLint enforces it; the on-edit hook hands back what is missing.
+- JSDoc on every module-level declaration (function, component, hook, class, method, const, type): a summary, `@param`, `@returns`, `@throws {Type}`; no `{types}` on params or returns. ESLint enforces it in TypeScript files, except `@throws` in an async function, which it cannot see; the on-edit hook hands back what is missing.
 - A `//` comment only for a why the code can't say: an ordering, an outside constraint, a workaround. Details: `internal-docs/conventions/code-style.md`.
 
 ## What gates a change

@@ -6,6 +6,8 @@ import tseslint from "typescript-eslint";
 import { fixupPluginRules } from "@eslint/compat";
 import js from "@eslint/js";
 
+const typescript = ["**/*.ts", "**/*.tsx", "**/*.mts", "**/*.cts"];
+
 const moduleLevel = (node: string) => [
   `Program > ${node}`,
   `Program > ExportNamedDeclaration > ${node}`,
@@ -45,9 +47,11 @@ export default tseslint.config(
     },
   },
   // The convention: internal-docs/conventions/code-style.md. Fixers that would
-  // insert placeholder docs stay off, so --fix never writes an empty block.
-  jsdoc.configs["flat/recommended-typescript-error"],
+  // insert placeholder docs or delete text stay off: the on-edit hook runs
+  // --fix unseen. TypeScript files only, since the rules assume no `{types}`.
+  { ...jsdoc.configs["flat/recommended-typescript-error"], files: typescript },
   {
+    files: typescript,
     rules: {
       "jsdoc/require-jsdoc": [
         "error",
@@ -65,11 +69,29 @@ export default tseslint.config(
             ...moduleLevel("TSInterfaceDeclaration"),
             ...moduleLevel("TSTypeAliasDeclaration"),
             ...moduleLevel("TSEnumDeclaration"),
+            "Program > ExportDefaultDeclaration > ArrowFunctionExpression",
             'MethodDefinition:not([kind="constructor"])',
+            'PropertyDefinition[value.type="ArrowFunctionExpression"]',
           ],
         },
       ],
-      "jsdoc/require-description": ["error", { contexts: ["any"] }],
+      "jsdoc/require-description": [
+        "error",
+        {
+          contexts: ["any"],
+          exemptedBy: ["inheritdoc", "vitest-environment", "jest-environment"],
+        },
+      ],
+      "jsdoc/check-tag-names": [
+        "error",
+        {
+          typed: true,
+          enableFixer: false,
+          definedTags: ["vitest-environment", "jest-environment"],
+        },
+      ],
+      "jsdoc/empty-tags": "off",
+      "jsdoc/no-defaults": "off",
       "jsdoc/require-param": [
         "error",
         {
@@ -89,10 +111,11 @@ export default tseslint.config(
   },
   {
     files: [
-      "**/*.spec.ts",
-      "**/*.test.ts",
-      "**/*.test.tsx",
+      "**/*.spec.{ts,tsx}",
+      "**/*.e2e-spec.ts",
+      "**/*.test.{ts,tsx}",
       "**/*.stories.tsx",
+      "**/*.config.{ts,mts,cts}",
       "**/testing/**",
     ],
     rules: {

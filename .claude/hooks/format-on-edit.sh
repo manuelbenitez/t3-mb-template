@@ -10,6 +10,7 @@
 # second eslint pass would race this one's --fix write.
 # Tests: scripts/hooks.test.d/60-format-on-edit.sh.
 set -u
+unset CDPATH
 command -v jq >/dev/null || exit 0
 
 INPUT=$(cat)
@@ -42,18 +43,23 @@ pkg=$(printf '%s' "$rel" | grep -oE '^(apps|packages|tooling)/[^/]+')
 [ -n "$pkg" ] && ls "$pkg"/eslint.config.* >/dev/null 2>&1 || exit 0
 
 REPORT=$(cd "$pkg" && pnpm exec eslint --fix --no-warn-ignored --format json "${rel#"$pkg"/}" 2>/dev/null)
-JSDOC=$(printf '%s' "$REPORT" | jq -r '
+ALL=$(printf '%s' "$REPORT" | jq -r '
   .[0].messages[]?
   | select(.severity == 2 and ((.ruleId // "") | startswith("jsdoc/")))
-  | "  \(.line):\(.column) \(.message) (\(.ruleId))"' 2>/dev/null | head -20)
+  | "  \(.line):\(.column) \(.message) (\(.ruleId))"' 2>/dev/null)
+JSDOC=$(printf '%s\n' "$ALL" | head -20)
+TOTAL=$(printf '%s\n' "$ALL" | grep -c .)
+[ "$TOTAL" -le 20 ] || JSDOC="$JSDOC"$'\n'"  … and $((TOTAL - 20)) more (pnpm exec eslint $rel)"
 
-# A line comment or a trailing one; `///`, a URL's `://` and lint or type
-# directives are not counted.
+# A line comment or a trailing one; `///`, a URL's `://` and tool directives
+# (lint, types, test environment, coverage, JSX pragma) are not counted.
 count_comments() {
-  grep -E '(^|[[:space:]])//([[:space:]]|$)' | grep -vcE '//[[:space:]]*(eslint-|@ts-|prettier-ignore)' || true
+  grep -E '(^|[[:space:]])//([^/]|$)' |
+    grep -vcE '//[[:space:]]*(eslint-|@ts-|prettier-ignore|@vitest-environment|@jest-environment|@jsx|c8[[:space:]]|istanbul[[:space:]])' || true
 }
 NEW=$(printf '%s' "$INPUT" | jq -r '.tool_input.new_string // .tool_input.content // empty' 2>/dev/null | count_comments)
-OLD=$(printf '%s' "$INPUT" | jq -r '.tool_input.old_string // empty' 2>/dev/null | count_comments)
+# A Write over an existing file is measured against what it replaced.
+OLD=$(printf '%s' "$INPUT" | jq -r 'if .tool_name == "Write" then (.tool_response.originalFile // "") else (.tool_input.old_string // "") end' 2>/dev/null | count_comments)
 ADDED=$((${NEW:-0} - ${OLD:-0}))
 
 NOTE=""

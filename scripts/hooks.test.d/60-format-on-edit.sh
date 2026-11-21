@@ -14,8 +14,9 @@ fmt() { # fmt <file> <old_string> <new_string> <label>   — format-on-edit.sh o
     CLAUDE_PROJECT_DIR="$PROJECT" bash "$HOOKS/format-on-edit.sh" 2>&1); RC=$?
   [ "$RC" = 0 ] && ok "format-on-edit(0): $4" || bad "format-on-edit: $4 got rc $RC: $(printf '%s' "$OUT" | head -3 | tr '\n' ' ')"
 }
-fmt_write() { # fmt_write <file> <content> <label>   — format-on-edit.sh on a Write payload
-  OUT=$(jq -n --arg f "$1" --arg c "$2" '{hook_event_name:"PostToolUse",tool_name:"Write",tool_input:{file_path:$f,content:$c}}' |
+fmt_write() { # fmt_write <file> <content> <label> [original]   — format-on-edit.sh on a Write payload; original = the file it replaced
+  OUT=$(jq -n --arg f "$1" --arg c "$2" --arg o "${4-}" '{hook_event_name:"PostToolUse",tool_name:"Write",tool_input:{file_path:$f,content:$c},
+      tool_response:(if $o == "" then {type:"create",originalFile:null} else {type:"update",originalFile:$o} end)}' |
     CLAUDE_PROJECT_DIR="$PROJECT" bash "$HOOKS/format-on-edit.sh" 2>&1); RC=$?
   [ "$RC" = 0 ] && ok "format-on-edit(0): $3" || bad "format-on-edit: $3 got rc $RC: $(printf '%s' "$OUT" | head -3 | tr '\n' ' ')"
 }
@@ -27,7 +28,18 @@ export FAKE_ESLINT_JSON="$JSDOC_ERR"
 fmt "$SRC" '' 'export const y = 2;' 'a missing JSDoc → block naming the line and the rule'
 said '"decision": "block"'; said "apps/api/src/x.ts: JSDoc missing"; said "3:8 Missing JSDoc comment (jsdoc/require-jsdoc)"
 pnpm_ran "^$T/repo/apps/api${TAB}exec${TAB}eslint${TAB}--fix${TAB}--no-warn-ignored${TAB}--format${TAB}json${TAB}src/x.ts$" &&
-  ok "  …one eslint run, from the file's package, --fix with a json report" || bad "  …eslint calls: $(tr '\t' ' ' <"$FAKE_PNPM_LOG")"
+  ok "  …from the file's package, --fix with a json report" || bad "  …eslint calls: $(tr '\t' ' ' <"$FAKE_PNPM_LOG")"
+[ "$(grep -c "${TAB}eslint${TAB}" "$FAKE_PNPM_LOG")" = 1 ] &&
+  ok "  …exactly one eslint run" || bad "  …eslint calls: $(tr '\t' ' ' <"$FAKE_PNPM_LOG")"
+export CDPATH=.
+fmt "$SRC" '' 'export const y = 2;' 'an exported CDPATH does not leak into the report → still the block'
+unset CDPATH
+said '"decision": "block"'
+FAKE_ESLINT_JSON=$(jq -nc '[{messages:[range(25) | {ruleId:"jsdoc/require-jsdoc",severity:2,message:"Missing JSDoc comment",line:(. + 1),column:1}]}]')
+export FAKE_ESLINT_JSON
+fmt "$SRC" '' 'export const y = 2;' '25 errors → the first 20 and a count of the rest'
+said "20:1 Missing JSDoc"; unsaid "21:1 Missing JSDoc"; said "… and 5 more"
+export FAKE_ESLINT_JSON="$JSDOC_ERR"
 export FAKE_FAIL="eslint"
 fmt "$SRC" '' 'export const y = 2;' 'eslint exits 1 on an error, as the real one does → still the block'
 said '"decision": "block"'
@@ -46,8 +58,14 @@ export FAKE_ESLINT_JSON="$CLEAN"
 fmt "$SRC" 'const a = 1;' $'// set a\nconst a = 1; // one\n' 'two added comments, one trailing → the nudge'
 said '"additionalContext"'; said "this edit adds 2"; unsaid '"decision"'
 fmt "$SRC" '' $'// eslint-disable-next-line no-console\n// @ts-expect-error legacy\n/// <reference types="node" />\nconst u = "http://x";\n// prettier-ignore\n' 'directives, a triple-slash and a URL → silent'; silent
+fmt "$SRC" '' $'// @vitest-environment jsdom\n// c8 ignore next\n// istanbul ignore next\n// @jsxImportSource preact\n' 'test environment, coverage and JSX pragmas → silent'; silent
+fmt "$SRC" '' $'//TODO: drop this\nconst t = 1;' 'a comment with no space after // still counts'
+said "this edit adds 1"
 fmt "$SRC" $'// keep\nconst a = 1;' $'// keep\nconst a = 2;' 'an edit that keeps its existing comment → silent'; silent
-fmt_write "$SRC" $'// header\nexport const w = 1;\n' 'a Write counts its whole content'
+fmt_write "$SRC" $'// header\nexport const w = 1;\n' 'a Write that creates a file counts its whole content'
+said "this edit adds 1"
+fmt_write "$SRC" $'// header\nexport const w = 2;\n' 'a Write over a file keeps its comment → silent' $'// header\nexport const w = 1;\n'; silent
+fmt_write "$SRC" $'// header\n// what\nexport const w = 2;\n' 'a Write over a file adds one comment → counted against the original' $'// header\nexport const w = 1;\n'
 said "this edit adds 1"
 export FAKE_ESLINT_JSON="$JSDOC_ERR"
 fmt "$SRC" '' $'// what\nexport const z = 3;' 'a jsdoc error and an added comment → one block carrying both'
