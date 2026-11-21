@@ -62,7 +62,7 @@
             "type": "command",
             "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/format-on-edit.sh\"",
             "timeout": 15,
-            "statusMessage": "prettier + eslint --fix on edited file"
+            "statusMessage": "prettier + eslint --fix + JSDoc check on edited file"
           },
           {
             "type": "command",

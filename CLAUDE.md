@@ -21,6 +21,12 @@ A full-stack monorepo: `apps/api` (NestJS 12 + MongoDB), `apps/nextjs` (Next.js 
 
 Code under `apps/api/src` updates its `internal-docs/` page in the same commit; code under `apps/nextjs/src` or `packages/ui/src` updates a page under `internal-docs/frontend/`. The docs gate enforces it and names the page from `.claude/review-map.yml`. Index: `internal-docs/README.md`.
 
+## Code style
+
+- Names and structure carry the meaning. No comment that narrates what the next line does.
+- JSDoc on every module-level declaration (function, component, hook, class, method, const, type): a summary, `@param`, `@returns`, `@throws {Type}`; no `{types}` on params or returns. ESLint enforces it; the on-edit hook hands back what is missing.
+- A `//` comment only for a why the code can't say: an ordering, an outside constraint, a workaround. Details: `internal-docs/conventions/code-style.md`.
+
 ## What gates a change
 
 The local Claude Code hooks are the gate. One PreToolUse hook on the Bash tool, `.claude/hooks/bash-gate.sh`, classifies a command as a commit, a push or a PR open and runs the stages under `.claude/hooks/gates/`. Every gate, its trigger, remedy and bypass: `internal-docs/runbooks/local-gates.md`.
@@ -28,7 +34,7 @@ The local Claude Code hooks are the gate. One PreToolUse hook on the Bash tool, 
 - On a commit: the attribution guard, the secret block, the docs gate, then the deps check on a manifest change, typecheck and eslint on the staged files, and the tests related to the staged files (`bash scripts/test-changed.sh <paths>`). Any failure blocks.
 - On `git push`: never to `main`; a forced update needs `--force-with-lease`; a branch with an open PR needs review evidence for the pushed sha (`bash scripts/ai-review.sh verify`).
 - On `gh pr create`: the lifecycle marker (`bash scripts/lifecycle-suite.sh`) when an auth or users path changed, the deps marker (`bash scripts/deps-smoke.sh`) when a manifest changed, and the review mark (`bash scripts/ai-review.sh mark`, after `/review`).
-- `bash scripts/obligations.sh` prints what a branch still owes; the session-start hook injects it. On edit: secret scan, prettier and eslint fix, reuse nudge, scope nudge. On stop: typecheck of the touched workspaces.
+- `bash scripts/obligations.sh` prints what a branch still owes; the session-start hook injects it. On edit: secret scan, prettier and eslint fix with the JSDoc check and the `//` comment nudge, reuse nudge, scope nudge. On stop: typecheck of the touched workspaces.
 - Everything project-specific (repo, workspaces, docs pairs, commands) is the `project:` block of `.claude/review-map.yml`.
 
 ## Skills: touch X, run Y
