@@ -5,6 +5,8 @@
 #   - jsdoc/* errors left after the fix: {"decision":"block"} naming each one,
 #     so the JSDoc is written in the same turn rather than at commit time;
 #   - `//` comments the edit added: additionalContext asking to keep only a why.
+#     A nudge, not a gate: a replace_all edit counts as one site, and `/* */`
+#     comments are not counted.
 # Silent otherwise. Fails open: the commit gate's eslint is the backstop.
 # One script, not two hooks: matching PostToolUse hooks run in parallel, and a
 # second eslint pass would race this one's --fix write.

@@ -46,7 +46,7 @@ If a block needs a comment to be understood, extract it into a function whose na
 
 ## What enforces it
 
-- **ESLint** (`eslint-plugin-jsdoc`, configured in `tooling/eslint/base.ts`) for the JSDoc rules. The editor, the commit gate and CI's `pnpm lint` all run it. Fixers that would insert placeholder docs or delete text (`empty-tags`, `no-defaults`, the tag-name rewrites) are off, so `--fix` never writes an empty block or drops a word.
+- **ESLint** (`eslint-plugin-jsdoc`, configured in `tooling/eslint/base.ts`) for the JSDoc rules. The editor, the commit gate and CI's `pnpm lint` all run it. Fixers that would insert placeholder docs or delete text (`empty-tags`, `no-defaults`, removal of an unknown tag) are off, so `--fix` never writes an empty block or drops a word; it still renames an alias tag to its canonical name (`@typeParam` to `@template`). `tooling/eslint/base.test.ts` pins this behaviour.
 - **The on-edit hook** (`.claude/hooks/format-on-edit.sh`) passes the `jsdoc/*` errors left after its `eslint --fix` back to Claude right after the edit, and notes when an edit adds `//` comments. See [runbooks/local-gates.md](../runbooks/local-gates.md).
 - The `//` rule itself is a convention, reviewed in `/review`; no lint rule can tell a why from a what.
 

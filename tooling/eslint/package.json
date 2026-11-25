@@ -2,6 +2,9 @@
   "name": "@acme/eslint-config",
   "private": true,
   "type": "module",
+  "scripts": {
+    "test": "node --test base.test.ts"
+  },
   "exports": {
     "./base": "./base.ts",
     "./nextjs": "./nextjs.ts"
