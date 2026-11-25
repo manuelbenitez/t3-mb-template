@@ -6,8 +6,15 @@ import tseslint from "typescript-eslint";
 import { fixupPluginRules } from "@eslint/compat";
 import js from "@eslint/js";
 
+/** The files the JSDoc rules apply to: they assume types live in TypeScript. */
 const typescript = ["**/*.ts", "**/*.tsx", "**/*.mts", "**/*.cts"];
 
+/**
+ * Selectors for a declaration at the top of a module, bare or exported.
+ *
+ * @param node - The AST node type.
+ * @returns One selector per form.
+ */
 const moduleLevel = (node: string) => [
   `Program > ${node}`,
   `Program > ExportNamedDeclaration > ${node}`,
@@ -49,10 +56,13 @@ export default tseslint.config(
   // The convention: internal-docs/conventions/code-style.md. Fixers that would
   // insert placeholder docs or delete text stay off: the on-edit hook runs
   // --fix unseen. TypeScript files only, since the rules assume no `{types}`.
-  { ...jsdoc.configs["flat/recommended-typescript-error"], files: typescript },
+  // The plugin is registered for every file, so a jsdoc/* directive in a .js
+  // file still resolves; only the rules are TypeScript-only.
+  { plugins: { jsdoc } },
   {
     files: typescript,
     rules: {
+      ...jsdoc.configs["flat/recommended-typescript-error"].rules,
       "jsdoc/require-jsdoc": [
         "error",
         {
@@ -71,6 +81,7 @@ export default tseslint.config(
             ...moduleLevel("TSEnumDeclaration"),
             "Program > ExportDefaultDeclaration > ArrowFunctionExpression",
             'MethodDefinition:not([kind="constructor"])',
+            "TSAbstractMethodDefinition",
             'PropertyDefinition[value.type="ArrowFunctionExpression"]',
           ],
         },
@@ -92,6 +103,7 @@ export default tseslint.config(
       ],
       "jsdoc/empty-tags": "off",
       "jsdoc/no-defaults": "off",
+      "jsdoc/no-multi-asterisks": ["error", { allowWhitespace: true }],
       "jsdoc/require-param": [
         "error",
         {
@@ -115,7 +127,7 @@ export default tseslint.config(
       "**/*.e2e-spec.ts",
       "**/*.test.{ts,tsx}",
       "**/*.stories.tsx",
-      "**/*.config.{ts,mts,cts}",
+      "*.config.{mts,cts}",
       "**/testing/**",
     ],
     rules: {

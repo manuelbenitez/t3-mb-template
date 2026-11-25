@@ -24,7 +24,7 @@ Every function, component, hook, class, class method (an arrow-function property
 async login(loginDto: LoginDto) {
 ```
 
-Exempt: `*.spec.ts(x)`, `*.e2e-spec.ts`, `*.test.ts(x)`, `*.stories.tsx`, `**/testing/**`, `*.config.ts`, plain JavaScript files (the rules assume TypeScript, with no `{types}`), and `packages/ui` (shadcn files, whose ESLint config doesn't extend the shared base).
+Exempt: `*.spec.ts(x)`, `*.e2e-spec.ts`, `*.test.ts(x)`, `*.stories.tsx`, `**/testing/**`, a package's root `*.config.*`, plain JavaScript files (the rules assume TypeScript, with no `{types}`), `packages/ui` (shadcn files, whose ESLint config doesn't extend the shared base) and `tooling/` (no ESLint config of its own; the convention still applies by hand).
 
 ## Comments inside the code
 
@@ -46,7 +46,7 @@ If a block needs a comment to be understood, extract it into a function whose na
 
 ## What enforces it
 
-- **ESLint** (`eslint-plugin-jsdoc`, configured in `tooling/eslint/base.ts`) for the JSDoc rules. The editor, the commit gate and CI's `pnpm lint` all run it. Fixers that would insert placeholder docs or delete text (`empty-tags`, `no-defaults`, removal of an unknown tag) are off, so `--fix` never writes an empty block or drops a word; it still renames an alias tag to its canonical name (`@typeParam` to `@template`). `tooling/eslint/base.test.ts` pins this behaviour.
+- **ESLint** (`eslint-plugin-jsdoc`, configured in `tooling/eslint/base.ts`) for the JSDoc rules. The editor, the commit gate and CI's `pnpm lint` all run it. Fixers that would insert placeholder docs or delete text (`require-param`, `require-returns`, `empty-tags`, `no-defaults`, the removal of tags TypeScript makes redundant, and the `no-multi-asterisks` strip of `* item` bullets) are off, so `--fix` never writes an empty block or drops a word; it still renames an alias tag to its canonical name (`@typeParam` to `@template`). `tooling/eslint/base.test.ts` pins this; it runs in `pnpm test` and CI, not in the commit gate's related-tests step, which covers the app and package workspaces.
 - **The on-edit hook** (`.claude/hooks/format-on-edit.sh`) passes the `jsdoc/*` errors left after its `eslint --fix` back to Claude right after the edit, and notes when an edit adds `//` comments. See [runbooks/local-gates.md](../runbooks/local-gates.md).
 - The `//` rule itself is a convention, reviewed in `/review`; no lint rule can tell a why from a what.
 

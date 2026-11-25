@@ -35,13 +35,17 @@ describe("jsdoc rules", () => {
         "export type Alias = string;",
         "export enum Kind { A }",
         "export default () => local;",
+        "export const exportedConst = 1;",
+        "export abstract class Base {",
+        "  abstract go(): void;",
+        "}",
         "",
       ].join("\n"),
     );
     const lines = jsdoc
       .filter((m) => m.ruleId === "jsdoc/require-jsdoc")
       .map((m) => m.line);
-    assert.deepEqual(lines, [1, 5, 6, 8, 9, 11, 12, 13, 14]);
+    assert.deepEqual(lines, [1, 5, 6, 8, 9, 11, 12, 13, 14, 15, 16, 17]);
   });
 
   it("accept a complete block", async () => {
@@ -72,7 +76,12 @@ describe("jsdoc rules", () => {
         "/**",
         " * Keeps a value.",
         " *",
+        " * Steps:",
+        " * * parse the token",
+        " * * check the role",
+        " *",
         " * @internal Kept for the migration.",
+        " * @abstract",
         " * @typeParam T - The value type.",
         " * @param value - The value.",
         " * @param [count=1] - How many.",
@@ -89,7 +98,42 @@ describe("jsdoc rules", () => {
     // `@template`); its text must survive.
     assert.match(output, / T - The value type\./);
     assert.match(output, /\[count=1\]/);
+    assert.match(output, / \* \* parse the token\n \* \* check the role/);
+    assert.match(output, /@abstract/);
   });
+
+  it("never insert placeholder tags on --fix", async () => {
+    const code = [
+      "/** Echoes the value. */",
+      "export function echo(value: string): string {",
+      "  return value;",
+      "}",
+      "",
+    ].join("\n");
+    const { output } = await lint("src/echo.ts", code);
+    assert.equal(output, code);
+  });
+
+  it("resolve a jsdoc/* directive in plain JavaScript", async () => {
+    const [result] = await eslint.lintText(
+      "// eslint-disable-next-line jsdoc/require-jsdoc -- generated\nexport const a = 1;\n",
+      { filePath: "src/gen.mjs" },
+    );
+    assert.deepEqual(
+      result.messages.filter((m) => m.severity === 2),
+      [],
+    );
+  });
+
+  for (const file of ["src/a.ts", "src/config/jwt.config.ts"]) {
+    it(`require JSDoc in ${file}`, async () => {
+      const { jsdoc } = await lint(file, "export const a = 1;\n");
+      assert.deepEqual(
+        jsdoc.map((m) => m.ruleId),
+        ["jsdoc/require-jsdoc"],
+      );
+    });
+  }
 
   it("leave plain JavaScript and its {types} alone", async () => {
     const { jsdoc, output } = await lint(
@@ -125,7 +169,7 @@ describe("jsdoc rules", () => {
     "src/a.test.ts",
     "src/a.test.tsx",
     "src/a.stories.tsx",
-    "src/vite.config.ts",
+    "vite.config.mts",
     "src/testing/a.ts",
   ]) {
     it(`exempt ${file}`, async () => {
