@@ -56,11 +56,9 @@ export default tseslint.config(
   // The convention: internal-docs/conventions/code-style.md. Fixers that would
   // insert placeholder docs or delete text stay off: the on-edit hook runs
   // --fix unseen. TypeScript files only, since the rules assume no `{types}`.
-  // The plugin is registered for every file, so a jsdoc/* directive in a .js
-  // file still resolves; only the rules are TypeScript-only.
-  { plugins: { jsdoc } },
   {
     files: typescript,
+    plugins: { jsdoc },
     rules: {
       ...jsdoc.configs["flat/recommended-typescript-error"].rules,
       "jsdoc/require-jsdoc": [
@@ -103,6 +101,7 @@ export default tseslint.config(
       ],
       "jsdoc/empty-tags": "off",
       "jsdoc/no-defaults": "off",
+      "jsdoc/require-property": "off",
       "jsdoc/no-multi-asterisks": ["error", { allowWhitespace: true }],
       "jsdoc/require-param": [
         "error",

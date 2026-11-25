@@ -112,17 +112,12 @@ describe("jsdoc rules", () => {
     ].join("\n");
     const { output } = await lint("src/echo.ts", code);
     assert.equal(output, code);
-  });
 
-  it("resolve a jsdoc/* directive in plain JavaScript", async () => {
-    const [result] = await eslint.lintText(
-      "// eslint-disable-next-line jsdoc/require-jsdoc -- generated\nexport const a = 1;\n",
-      { filePath: "src/gen.mjs" },
+    const typedef = await lint(
+      "src/foo.ts",
+      "/**\n * Shape.\n *\n * @typedef {object} Foo\n */\nexport type Foo = { a: string };\n",
     );
-    assert.deepEqual(
-      result.messages.filter((m) => m.severity === 2),
-      [],
-    );
+    assert.doesNotMatch(typedef.output, /@property/);
   });
 
   for (const file of ["src/a.ts", "src/config/jwt.config.ts"]) {

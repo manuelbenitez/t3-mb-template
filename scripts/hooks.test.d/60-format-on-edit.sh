@@ -38,7 +38,7 @@ said '"decision": "block"'
 FAKE_ESLINT_JSON=$(jq -nc '[{messages:[range(25) | {ruleId:"jsdoc/require-jsdoc",severity:2,message:"Missing JSDoc comment",line:(. + 1),column:1}]}]')
 export FAKE_ESLINT_JSON
 fmt "$SRC" '' 'export const y = 2;' '25 errors → the first 20 and a count of the rest'
-said "20:1 Missing JSDoc"; unsaid "21:1 Missing JSDoc"; said "… and 5 more (pnpm -C apps/api exec eslint src/x.ts)"
+said "20:1 Missing JSDoc"; unsaid "21:1 Missing JSDoc"; said "… and 5 more (pnpm -C apps/api exec eslint 'src/x.ts')"
 export FAKE_ESLINT_JSON="$JSDOC_ERR"
 export FAKE_FAIL="eslint"
 fmt "$SRC" '' 'export const y = 2;' 'eslint exits 1 on an error, as the real one does → still the block'

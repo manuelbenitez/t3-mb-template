@@ -51,7 +51,7 @@ ALL=$(printf '%s' "$REPORT" | jq -r '
   | "  \(.line):\(.column) \(.message) (\(.ruleId))"' 2>/dev/null)
 JSDOC=$(printf '%s\n' "$ALL" | head -20)
 TOTAL=$(printf '%s\n' "$ALL" | grep -c .)
-[ "$TOTAL" -le 20 ] || JSDOC="$JSDOC"$'\n'"  … and $((TOTAL - 20)) more (pnpm -C $pkg exec eslint ${rel#"$pkg"/})"
+[ "$TOTAL" -le 20 ] || JSDOC="$JSDOC"$'\n'"  … and $((TOTAL - 20)) more (pnpm -C $pkg exec eslint '${rel#"$pkg"/}')"
 
 # A line comment or a trailing one; `///`, a URL's `://` and tool directives
 # (lint, types, test environment, coverage, JSX pragma) are not counted.
