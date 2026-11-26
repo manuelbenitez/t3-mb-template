@@ -11,11 +11,13 @@ import { ExtractJwt, Strategy } from "passport-jwt";
 
 import { User, UserDocument } from "../../users/schemas/user.schema";
 
+/** Claims signed into every access token. */
 export interface JwtPayload {
   sub: string;
   email: string;
 }
 
+/** Passport strategy that verifies the bearer token and loads the account behind it. */
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
@@ -29,6 +31,14 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
+  /**
+   * Resolves a verified token to the user attached to the request.
+   *
+   * @param payload - The verified token claims.
+   * @returns The user id, email and roles.
+   * @throws {UnauthorizedException} When the claims are incomplete or the user no longer exists.
+   * @throws {ForbiddenException} When the account is paused or suspended.
+   */
   async validate(payload: JwtPayload) {
     if (!payload.sub || !payload.email) {
       throw new UnauthorizedException();

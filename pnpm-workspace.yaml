@@ -10,6 +10,7 @@ catalog:
   '@tanstack/react-query': ^5.104.0
   '@types/node': ^24.19.1
   eslint: ^10.11.0
+  eslint-plugin-jsdoc: ^65.5.0
   prettier: ^3.9.9
   react-hook-form: ^7.89.0
   tailwindcss: ^4.3.3

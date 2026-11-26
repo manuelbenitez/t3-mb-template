@@ -1,14 +1,23 @@
+/** Shortest JWT_SECRET accepted at boot. */
 const MIN_JWT_SECRET_LENGTH = 32;
-// The .env.example value: long enough to pass the length check, but public.
+
+/** The .env.example value: long enough to pass the length check, but public. */
 const PLACEHOLDER_JWT_SECRET = "change-me-use-openssl-rand-base64-32";
 
+/** The validated environment the API reads through ConfigService. */
 export interface Env {
   MONGODB_URI: string;
   JWT_SECRET: string;
 }
 
-// Fails boot on a missing or weak secret instead of falling back to a
-// well-known default.
+/**
+ * Fails boot on a missing or weak secret instead of falling back to a
+ * well-known default.
+ *
+ * @param config - The raw environment.
+ * @returns The environment, with MONGODB_URI and JWT_SECRET checked.
+ * @throws {Error} Listing every invalid variable.
+ */
 export function validateEnv(config: Record<string, unknown>): Env {
   const errors: string[] = [];
   const mongoUri = config.MONGODB_URI;

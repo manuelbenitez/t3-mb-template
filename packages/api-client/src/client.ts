@@ -1,16 +1,10 @@
-/**
- * @acme/api-client
- *
- * Type-safe fetch wrapper for the NestJS backend.
- * baseUrl = NEXT_PUBLIC_API_URL (e.g. http://localhost:3001)
- * Endpoints include the full /api prefix (e.g. /api/auth/login).
- */
-
+/** How an ApiClient reaches the backend. */
 export interface ApiConfig {
   baseUrl: string;
   getToken?: () => string | null | Promise<string | null>;
 }
 
+/** A non-2xx response, carrying the status and the parsed error body when there is one. */
 export class ApiError extends Error {
   constructor(
     public status: number,
@@ -22,6 +16,11 @@ export class ApiError extends Error {
   }
 }
 
+/**
+ * Typed fetch wrapper for the NestJS backend. `baseUrl` is NEXT_PUBLIC_API_URL
+ * (e.g. http://localhost:3001); endpoints carry the full `/api` prefix
+ * (e.g. `/api/auth/login`).
+ */
 export class ApiClient {
   private config: ApiConfig;
 
@@ -29,10 +28,20 @@ export class ApiClient {
     this.config = config;
   }
 
+  /**
+   * The backend origin requests go to.
+   *
+   * @returns The configured base URL.
+   */
   get baseURL(): string {
     return this.config.baseUrl;
   }
 
+  /**
+   * Builds the JSON headers, with the bearer token when one is available.
+   *
+   * @returns The request headers.
+   */
   private async getHeaders(): Promise<Record<string, string>> {
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -48,6 +57,14 @@ export class ApiClient {
     return headers;
   }
 
+  /**
+   * Sends a request and parses the JSON body.
+   *
+   * @param endpoint - Path under the base URL, `/api` prefix included.
+   * @param options - Fetch options; headers merge over the defaults.
+   * @returns The parsed body, or undefined for an empty response.
+   * @throws {ApiError} When the response is not 2xx.
+   */
   private async request<T>(
     endpoint: string,
     options: RequestInit = {},
@@ -80,6 +97,13 @@ export class ApiClient {
     return JSON.parse(text) as T;
   }
 
+  /**
+   * Sends a GET request.
+   *
+   * @param endpoint - Path under the base URL.
+   * @param options - Query parameters to append.
+   * @returns The parsed body.
+   */
   async get<T>(
     endpoint: string,
     options?: { params?: Record<string, string> },
@@ -92,6 +116,13 @@ export class ApiClient {
     return this.request<T>(url, { method: "GET" });
   }
 
+  /**
+   * Sends a POST request with a JSON body.
+   *
+   * @param endpoint - Path under the base URL.
+   * @param data - The body, serialized as JSON.
+   * @returns The parsed body.
+   */
   async post<T>(endpoint: string, data?: unknown): Promise<T> {
     return this.request<T>(endpoint, {
       method: "POST",
@@ -99,6 +130,13 @@ export class ApiClient {
     });
   }
 
+  /**
+   * Sends a PATCH request with a JSON body.
+   *
+   * @param endpoint - Path under the base URL.
+   * @param data - The body, serialized as JSON.
+   * @returns The parsed body.
+   */
   async patch<T>(endpoint: string, data?: unknown): Promise<T> {
     return this.request<T>(endpoint, {
       method: "PATCH",
@@ -106,6 +144,13 @@ export class ApiClient {
     });
   }
 
+  /**
+   * Sends a PUT request with a JSON body.
+   *
+   * @param endpoint - Path under the base URL.
+   * @param data - The body, serialized as JSON.
+   * @returns The parsed body.
+   */
   async put<T>(endpoint: string, data?: unknown): Promise<T> {
     return this.request<T>(endpoint, {
       method: "PUT",
@@ -113,6 +158,12 @@ export class ApiClient {
     });
   }
 
+  /**
+   * Sends a DELETE request.
+   *
+   * @param endpoint - Path under the base URL.
+   * @returns The parsed body.
+   */
   async delete<T>(endpoint: string): Promise<T> {
     return this.request<T>(endpoint, { method: "DELETE" });
   }

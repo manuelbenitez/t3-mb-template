@@ -5,6 +5,11 @@ import type { LoginInput, RegisterInput } from "@acme/validators";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { authApi } from "~/lib/api";
 
+/**
+ * Signs in; a success stores the token, refreshes the session and opens the dashboard.
+ *
+ * @returns The login mutation.
+ */
 export function useLogin() {
   const queryClient = useQueryClient();
   const router = useRouter();
@@ -19,6 +24,11 @@ export function useLogin() {
   });
 }
 
+/**
+ * Creates an account; a success stores the token, refreshes the session and opens the dashboard.
+ *
+ * @returns The register mutation.
+ */
 export function useRegister() {
   const queryClient = useQueryClient();
   const router = useRouter();
@@ -33,6 +43,11 @@ export function useRegister() {
   });
 }
 
+/**
+ * Signs out: drops the token and every cached query, then opens the login page.
+ *
+ * @returns A function that signs out.
+ */
 export function useLogout() {
   const queryClient = useQueryClient();
   const router = useRouter();

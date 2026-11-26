@@ -3,6 +3,11 @@
 import { useLogout } from "~/hooks/use-auth";
 import { useCurrentUser } from "~/hooks/use-current-user";
 
+/**
+ * Signed-in landing page: the current user's profile and a sign-out button.
+ *
+ * @returns The dashboard.
+ */
 export default function DashboardPage() {
   const { data, isLoading } = useCurrentUser();
   const logout = useLogout();

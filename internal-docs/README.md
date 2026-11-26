@@ -18,6 +18,12 @@ Engineering docs for this repository: how it is built, why, and how to change it
 | [frontend/README.md](frontend/README.md)                       | The Next.js portal: routes, data fetching, forms, auth state |
 | [frontend/component-library.md](frontend/component-library.md) | `@acme/ui`: what exists, how to add a component              |
 
+## Conventions
+
+| Page                                                   | Covers                                                       |
+| ------------------------------------------------------ | ------------------------------------------------------------ |
+| [conventions/code-style.md](conventions/code-style.md) | JSDoc on every module-level declaration; `//` only for a why |
+
 ## Runbooks
 
 | Page                                               | Covers                                                                                   |

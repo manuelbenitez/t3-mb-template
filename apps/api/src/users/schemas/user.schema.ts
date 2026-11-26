@@ -1,11 +1,16 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { Document } from "mongoose";
 
+/** Every role a user can hold. Extend it for your domain; `@Roles()` and RolesGuard read this list. */
 export const ROLES = ["user", "admin"] as const;
+
+/** One of ROLES. */
 export type Role = (typeof ROLES)[number];
 
+/** A user as Mongoose returns it from a query. */
 export type UserDocument = User & Document;
 
+/** A user account. Mongoose sets createdAt and updatedAt. */
 @Schema({ timestamps: true })
 export class User extends Document {
   @Prop({ required: true, type: String })
@@ -17,7 +22,6 @@ export class User extends Document {
   @Prop({ required: true, type: String })
   password: string;
 
-  // Extend ROLES for your domain; @Roles() and RolesGuard read this list.
   @Prop({ type: [String], enum: ROLES, default: ["user"] })
   roles: Role[];
 
@@ -41,9 +45,9 @@ export class User extends Document {
   updatedAt: Date;
 }
 
+/** The User schema. Its JSON form drops password and __v and exposes _id as id. */
 export const UserSchema = SchemaFactory.createForClass(User);
 
-// Strip password and normalize _id on every JSON serialization
 /* eslint-disable @typescript-eslint/no-explicit-any */
 UserSchema.set("toJSON", {
   transform: (_doc: any, ret: any) => {

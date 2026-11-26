@@ -1,3 +1,4 @@
+/** A user as the API serializes it: no password, `_id` exposed as `id`. */
 export interface User {
   id: string;
   name: string;
@@ -10,11 +11,13 @@ export interface User {
   updatedAt?: string;
 }
 
+/** Response of register and login. */
 export interface AuthResponse {
   access_token: string;
   user: Omit<User, "accountStatus">;
 }
 
+/** Response of `GET /api/auth/session`. */
 export interface SessionResponse {
   user: User;
 }

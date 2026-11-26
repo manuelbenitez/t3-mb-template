@@ -4,14 +4,22 @@ import { AuthGuard } from "@nestjs/passport";
 
 import { IS_PUBLIC_KEY } from "../decorators/public.decorator";
 
-// Registered globally (APP_GUARD): every route needs a valid token unless the
-// handler or its controller is marked @Public().
+/**
+ * Registered globally (APP_GUARD): every route needs a valid token unless the
+ * handler or its controller is marked `@Public()`.
+ */
 @Injectable()
 export class JwtAuthGuard extends AuthGuard("jwt") {
   constructor(private reflector: Reflector) {
     super();
   }
 
+  /**
+   * Lets a public route through and hands the rest to the Passport JWT strategy.
+   *
+   * @param context - The current request context.
+   * @returns True for a public route, otherwise the strategy's verdict.
+   */
   canActivate(context: ExecutionContext) {
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       context.getHandler(),

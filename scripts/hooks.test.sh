@@ -46,9 +46,11 @@ REPO=$(node "$ROOT/scripts/review-map.mjs" config | sed -n "s/^HOOK_CFG_REPO='\(
 mkdir -p "$T/bin" "$T/$(dirname "$REPO")" "$T/elsewhere" "$T/fakegates" "$T/gates-mixed"
 cat >"$T/bin/pnpm" <<'SH'
 #!/usr/bin/env bash
-# Fake pnpm: records the directory it ran in and its argv (tab-separated), and
+# Fake pnpm: records the directory it ran in and its argv (tab-separated),
+# prints FAKE_ESLINT_JSON on an eslint call (its --format json report), and
 # fails when any argument is listed in FAKE_FAIL (e.g. FAKE_FAIL="typecheck vitest").
 { printf '%s' "$PWD"; printf '\t%s' "$@"; printf '\n'; } >>"${FAKE_PNPM_LOG:-/dev/null}"
+case " $* " in *" eslint "*) [ -z "${FAKE_ESLINT_JSON:-}" ] || printf '%s\n' "$FAKE_ESLINT_JSON" ;; esac
 for a in "$@"; do
   case " ${FAKE_FAIL:-} " in *" $a "*) echo "fake pnpm: $a failed" >&2; exit 1 ;; esac
 done

@@ -6,6 +6,11 @@ import { registerSchema, type RegisterInput } from "@acme/validators";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRegister } from "~/hooks/use-auth";
 
+/**
+ * Account creation; a success signs the new user in and opens the dashboard.
+ *
+ * @returns The registration form.
+ */
 export default function RegisterPage() {
   const register = useRegister();
 

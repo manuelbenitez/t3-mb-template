@@ -96,7 +96,7 @@ Both run by hand from a clean checkout and write a marker keyed to what they can
 
 - **SessionStart:** `check-skills.sh` (gstack installed?), `internal-docs-index.sh` (points the session at these docs), `obligations-context.sh` (prunes stale state, injects `obligations.sh`).
 - **PreToolUse Edit|Write:** `reuse-ui-primitives.sh`, a nudge toward `@acme/ui` when a new primitive-looking component is created.
-- **PostToolUse Edit|Write:** `secret-scan.sh` (wider patterns, a message, never a block), `format-on-edit.sh` (prettier and eslint `--fix` from the file's package), `ui-inventory-drift.sh`, `edit-nudge.sh` (B12: the skills, page and user-docs area the map attaches to the file, once per file per session).
+- **PostToolUse Edit|Write:** `secret-scan.sh` (wider patterns, a message, never a block), `format-on-edit.sh` (prettier and eslint `--fix` from the file's package; the `jsdoc/*` errors left after the fix come back to Claude as a block naming each one, and an edit that adds `//` comments gets a note to keep only a why, per [conventions/code-style.md](../conventions/code-style.md); fails open, since the commit gate's eslint is the backstop), `ui-inventory-drift.sh`, `edit-nudge.sh` (B12: the skills, page and user-docs area the map attaches to the file, once per file per session).
 - **Stop:** `typecheck-on-stop.sh` typechecks the touched workspaces and wakes the session on failure.
 
 ## State (B17)

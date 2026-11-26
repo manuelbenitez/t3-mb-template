@@ -8,10 +8,17 @@ import {
 } from "@nestjs/common";
 import type { Request, Response } from "express";
 
+/** Global filter that turns every exception into one JSON error shape and logs it. */
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
   private readonly logger = new Logger(HttpExceptionFilter.name);
 
+  /**
+   * Writes the error response for an exception.
+   *
+   * @param exception - Whatever was thrown.
+   * @param host - Gives access to the request and the response.
+   */
   catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
