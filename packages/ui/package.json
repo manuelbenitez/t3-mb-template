@@ -16,7 +16,7 @@
   "dependencies": {
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "tailwind-merge": "^3.7.0"
+    "tailwind-merge": "^3.7.1"
   },
   "devDependencies": {
     "@acme/eslint-config": "workspace:*",
@@ -27,7 +27,7 @@
     "prettier": "catalog:",
     "react": "catalog:react19",
     "typescript": "catalog:",
-    "typescript-eslint": "^8.71.0",
+    "typescript-eslint": "^8.73.0",
     "zod": "catalog:"
   },
   "peerDependencies": {
